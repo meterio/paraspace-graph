@@ -1,0 +1,238 @@
+# PoolCore
+type PoolCoreBorrowEntity @entity(immutable: true) {
+  id: ID!
+  block: BigInt!
+  transactionHash: Bytes!
+  msgSender: Bytes! #address
+  reserve:Bytes!
+  user:Bytes!
+  onBehalfOf:Bytes!
+  amount:BigInt!
+  borrowRate:BigInt!
+  referralCode:Int!
+}
+type PoolCoreFlashClaimEntity @entity(immutable: true) {
+  id: ID!
+  block: BigInt!
+  transactionHash: Bytes!
+  msgSender: Bytes! #address
+  target:Bytes!
+  initiator:Bytes!
+  nftAsset:Bytes!
+  tokenId:BigInt!
+}
+type PoolCoreLiquidateERC20Entity @entity(immutable: true) {
+  id: ID!
+  block: BigInt!
+  transactionHash: Bytes!
+  msgSender: Bytes! #address
+  collateralAsset:Bytes!
+  liquidationAsset:Bytes!
+  borrower:Bytes!
+  liquidationAmount:BigInt!
+  liquidatedCollateralAmount:BigInt!
+  liquidator:Bytes!
+  receivePToken:Boolean!
+}
+type PoolCoreLiquidateERC721Entity @entity(immutable: true) {
+  id: ID!
+  block: BigInt!
+  transactionHash: Bytes!
+  msgSender: Bytes! #address
+  collateralAsset:Bytes!
+  liquidationAsset:Bytes!
+  borrower:Bytes!
+  liquidationAmount:BigInt!
+  liquidatedCollateralTokenId:BigInt!
+  liquidator:Bytes!
+  receiveNToken:Boolean!
+}
+type PoolCoreRepayEntity @entity(immutable: true) {
+  id: ID!
+  block: BigInt!
+  transactionHash: Bytes!
+  msgSender: Bytes! #address
+  reserve:Bytes!
+  user:Bytes!
+  repayer:Bytes!
+  amount:BigInt!
+  usePTokens:Boolean!
+}
+type PoolCoreReserveUsedAsCollateralDisabledEntity @entity(immutable: true) {
+  id: ID!
+  block: BigInt!
+  transactionHash: Bytes!
+  msgSender: Bytes! #address
+  reserve:Bytes!
+  user:Bytes!
+}
+type PoolCoreReserveUsedAsCollateralEnabledEntity @entity(immutable: true) {
+  id: ID!
+  block: BigInt!
+  transactionHash: Bytes!
+  msgSender: Bytes! #address
+  reserve:Bytes!
+  user:Bytes!
+}
+type PoolCoreSupplyEntity @entity(immutable: true) {
+  id: ID!
+  block: BigInt!
+  transactionHash: Bytes!
+  msgSender: Bytes! #address
+  reserve:Bytes!
+  user:Bytes!
+  onBehalfOf:Bytes!
+  amount:BigInt!
+  referralCode:Int!
+}
+type PoolCoreSupplyERC721TokenData @entity(immutable: true) {
+  id: ID!
+  block: BigInt!
+  transactionHash: Bytes!
+  msgSender: Bytes! #address
+  tokenId:BigInt!
+  useAsCollateral:Boolean!
+}
+type PoolCoreSupplyERC721Entity @entity(immutable: true) {
+  id: ID!
+  block: BigInt!
+  transactionHash: Bytes!
+  msgSender: Bytes! #address
+  reserve:Bytes!
+  user:Bytes!
+  onBehalfOf:Bytes!
+  tokenData:[PoolCoreSupplyERC721TokenData!]!
+  referralCode:Int!
+  fromNToken:Boolean!
+}
+type PoolCoreWithdrawEntity @entity(immutable: true) {
+  id: ID!
+  block: BigInt!
+  transactionHash: Bytes!
+  msgSender: Bytes! #address
+  reserve:Bytes!
+  user:Bytes!
+  to:Bytes!
+  amount:BigInt!
+}
+type PoolCoreWithdrawERC721Entity @entity(immutable: true) {
+  id: ID!
+  block: BigInt!
+  transactionHash: Bytes!
+  msgSender: Bytes! #address
+  reserve:Bytes!
+  user:Bytes!
+  to:Bytes!
+  tokenIds:[BigInt!]!
+}
+# PoolMarketplace
+type PoolMarketplaceAcceptBidWithCreditOrderInfoOffer @entity(immutable: true) {
+  id: ID!
+  block: BigInt!
+  transactionHash: Bytes!
+  msgSender: Bytes! #address
+  itemType:Int!
+  token:Bytes!
+  identifierOrCriteria:BigInt!
+  startAmount:BigInt!
+  endAmount:BigInt!
+}
+type PoolMarketplaceAcceptBidWithCreditOrderInfoConsideration @entity(immutable: true) {
+  id: ID!
+  block: BigInt!
+  transactionHash: Bytes!
+  msgSender: Bytes! #address
+  itemType:Int!
+  token:Bytes!
+  identifierOrCriteria:BigInt!
+  startAmount:BigInt!
+  endAmount:BigInt!
+  recipient:Bytes!
+}
+type PoolMarketplaceAcceptBidWithCreditOrderInfo @entity(immutable: true) {
+  id: ID!
+  block: BigInt!
+  transactionHash: Bytes!
+  msgSender: Bytes! #address
+  maker:Bytes!
+  taker:Bytes!
+  tid:Bytes!
+  offer:[PoolMarketplaceAcceptBidWithCreditOrderInfoOffer!]!
+  consideration:[PoolMarketplaceAcceptBidWithCreditOrderInfoConsideration!]!
+}
+type PoolMarketplaceAcceptBidWithCreditCredit @entity(immutable: true) {
+  id: ID!
+  block: BigInt!
+  transactionHash: Bytes!
+  msgSender: Bytes! #address
+  token:Bytes!
+  amount:BigInt!
+  orderId:Bytes!
+  v:Int!
+  r:Bytes!
+  s:Bytes!
+}
+type PoolMarketplaceAcceptBidWithCreditEntity @entity(immutable: true) {
+  id: ID!
+  block: BigInt!
+  transactionHash: Bytes!
+  msgSender: Bytes! #address
+  marketplaceId:Bytes!
+  orderInfo:PoolMarketplaceAcceptBidWithCreditOrderInfo
+  credit:PoolMarketplaceAcceptBidWithCreditCredit
+}
+type PoolMarketplaceBuyWithCreditOrderInfoOffer @entity(immutable: true) {
+  id: ID!
+  block: BigInt!
+  transactionHash: Bytes!
+  msgSender: Bytes! #address
+  itemType:Int!
+  token:Bytes!
+  identifierOrCriteria:BigInt!
+  startAmount:BigInt!
+  endAmount:BigInt!
+}
+type PoolMarketplaceBuyWithCreditOrderInfoConsideration @entity(immutable: true) {
+  id: ID!
+  block: BigInt!
+  transactionHash: Bytes!
+  msgSender: Bytes! #address
+  itemType:Int!
+  token:Bytes!
+  identifierOrCriteria:BigInt!
+  startAmount:BigInt!
+  endAmount:BigInt!
+  recipient:Bytes!
+}
+type PoolMarketplaceBuyWithCreditOrderInfo @entity(immutable: true) {
+  id: ID!
+  block: BigInt!
+  transactionHash: Bytes!
+  msgSender: Bytes! #address
+  maker:Bytes!
+  taker:Bytes!
+  tid:Bytes!
+  offer:[PoolMarketplaceBuyWithCreditOrderInfoOffer!]!
+  consideration:[PoolMarketplaceBuyWithCreditOrderInfoConsideration!]!
+}
+type PoolMarketplaceBuyWithCreditCredit @entity(immutable: true) {
+  id: ID!
+  block: BigInt!
+  transactionHash: Bytes!
+  msgSender: Bytes! #address
+  token:Bytes!
+  amount:BigInt!
+  orderId:Bytes!
+  v:Int!
+  r:Bytes!
+  s:Bytes!
+}
+type PoolMarketplaceBuyWithCreditEntity @entity(immutable: true) {
+  id: ID!
+  block: BigInt!
+  transactionHash: Bytes!
+  msgSender: Bytes! #address
+  marketplaceId:Bytes!
+  orderInfo:PoolMarketplaceBuyWithCreditOrderInfo
+  credit:PoolMarketplaceBuyWithCreditCredit
+}

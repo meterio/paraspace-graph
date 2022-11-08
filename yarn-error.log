@@ -1,0 +1,42 @@
+Arguments: 
+  /opt/homebrew/Cellar/node@16/16.18.0/bin/node /opt/homebrew/Cellar/yarn/1.22.17_2/libexec/bin/yarn.js
+
+PATH: 
+  /Users/alanwang/Library/pnpm:/Users/alanwang/opt/sumoko_lua/bin;//Users/alanwang/.local/bin:/opt/homebrew/opt/node@16/bin:/Users/alanwang/Library/Python/3.8/bin:/opt/homebrew/opt/node@14/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Library/Apple/usr/bin:/Users/alanwang/Library/pnpm:/Users/alanwang/opt/sumoko_lua/bin;//Users/alanwang/.local/bin:/opt/homebrew/opt/node@16/bin:/Users/alanwang/Library/Python/3.8/bin:/opt/homebrew/opt/node@14/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/Users/alanwang/.cargo/bin:/Users/alanwang/.yarn/bin
+
+Yarn version: 
+  1.22.17
+
+Node version: 
+  16.18.0
+
+Platform: 
+  darwin arm64
+
+Trace: 
+  Error: ENOENT: no such file or directory, copyfile '/Users/alanwang/Library/Caches/Yarn/v6/npm-glob-7.1.6-141f33b81a7c2492e125594307480c46679278a6-integrity/node_modules/glob/README.md' -> '/Users/alanwang/repo/alannotnerd/generated-graph/node_modules/@graphprotocol/graph-cli/node_modules/glob/README.md'
+
+npm manifest: 
+  {
+    "name": "paraspace-mm-graph",
+    "license": "UNLICENSED",
+    "scripts": {
+      "codegen": "graph codegen",
+      "build": "graph build",
+      "deploy": "graph deploy --node https://api.studio.thegraph.com/deploy/ paraspace-mm-graph",
+      "test": "graph test"
+    },
+    "dependencies": {
+      "@graphprotocol/graph-cli": "0.34.0",
+      "@graphprotocol/graph-ts": "0.28.0"
+    },
+    "devDependencies": {
+      "matchstick-as": "0.5.0"
+    }
+  }
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile

@@ -1,0 +1,77 @@
+specVersion: 0.0.4
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: PoolCore
+    network: goerli
+    source:
+      address: "0xfE54AEF5540C40C8C9e0ad1bAFDbd64e334D101B"
+      abi: Contract
+      startBlock: 7648760
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - PoolCoreBorrowEntity
+        - PoolCoreFlashClaimEntity
+        - PoolCoreLiquidateERC20Entity
+        - PoolCoreLiquidateERC721Entity
+        - PoolCoreRepayEntity
+        - PoolCoreReserveUsedAsCollateralDisabledEntity
+        - PoolCoreReserveUsedAsCollateralEnabledEntity
+        - PoolCoreSupplyEntity
+        - PoolCoreSupplyERC721Entity
+        - PoolCoreWithdrawEntity
+        - PoolCoreWithdrawERC721Entity
+      abis:
+        - name: Contract
+          file: ./abis/PoolCore.json
+      eventHandlers:
+        - event: Borrow(indexed address,address,indexed address,uint256,uint256,indexed uint16)
+          handler: handleBorrow
+        - event: FlashClaim(indexed address,indexed address,indexed address,uint256)
+          handler: handleFlashClaim
+        - event: LiquidateERC20(indexed address,indexed address,indexed address,uint256,uint256,address,bool)
+          handler: handleLiquidateERC20
+        - event: LiquidateERC721(indexed address,indexed address,indexed address,uint256,uint256,address,bool)
+          handler: handleLiquidateERC721
+        - event: Repay(indexed address,indexed address,indexed address,uint256,bool)
+          handler: handleRepay
+        - event: ReserveUsedAsCollateralDisabled(indexed address,indexed address)
+          handler: handleReserveUsedAsCollateralDisabled
+        - event: ReserveUsedAsCollateralEnabled(indexed address,indexed address)
+          handler: handleReserveUsedAsCollateralEnabled
+        - event: Supply(indexed address,address,indexed address,uint256,indexed uint16)
+          handler: handleSupply
+        - event: SupplyERC721(indexed address,address,indexed address,(uint256,bool)[],indexed uint16,bool)
+          handler: handleSupplyERC721
+        - event: Withdraw(indexed address,indexed address,indexed address,uint256)
+          handler: handleWithdraw
+        - event: WithdrawERC721(indexed address,indexed address,indexed address,uint256[])
+          handler: handleWithdrawERC721
+      file: ./src/PoolCore.ts
+  - kind: ethereum
+    name: PoolMarketplace
+    network: goerli
+    source:
+      address: "0x88888888888880C8C9e0ad1bAFDbd64e334D101B"
+      abi: Contract
+      startBlock: 7648760
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - PoolMarketplaceAcceptBidWithCreditEntity
+        - PoolMarketplaceBuyWithCreditEntity
+      abis:
+        - name: Contract
+          file: ./abis/PoolMarketplace.json
+      eventHandlers:
+        - event: AcceptBidWithCredit(indexed bytes32,(address,address,bytes,(uint8,address,uint256,uint256,uint256)[],(uint8,address,uint256,uint256,uint256,address)[]),(address,uint256,bytes,uint8,bytes32,bytes32))
+          handler: handleAcceptBidWithCredit
+        - event: BuyWithCredit(indexed bytes32,(address,address,bytes,(uint8,address,uint256,uint256,uint256)[],(uint8,address,uint256,uint256,uint256,address)[]),(address,uint256,bytes,uint8,bytes32,bytes32))
+          handler: handleBuyWithCredit
+      file: ./src/PoolMarketplace.ts
