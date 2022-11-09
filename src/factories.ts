@@ -23,6 +23,8 @@ import {
   BuyWithCreditOrderInfoStruct,
   BuyWithCreditCreditStruct,
 } from "../generated/PoolMarketplace/Contract"
+import {
+} from "../generated/PoolConfigurator/Contract"
 
 // PoolCore
 
@@ -151,3 +153,4 @@ export const PoolMarketplaceBuyWithCreditCredit__factory: FPoolMarketplaceBuyWit
   entity.save();
   return id;
 }
+// PoolConfigurator

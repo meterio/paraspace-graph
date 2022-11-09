@@ -39,6 +39,7 @@ export function handleBorrow(event: Borrow): void {
   let entity = new PoolCoreBorrowEntity(ID);
   entity.block = event.block.number;
   entity.msgSender = event.transaction.from;
+  entity.msgValue = event.transaction.value;
   entity.transactionHash = event.transaction.hash;
   entity.reserve = event.params.reserve
   entity.user = event.params.user
@@ -58,6 +59,7 @@ export function handleFlashClaim(event: FlashClaim): void {
   let entity = new PoolCoreFlashClaimEntity(ID);
   entity.block = event.block.number;
   entity.msgSender = event.transaction.from;
+  entity.msgValue = event.transaction.value;
   entity.transactionHash = event.transaction.hash;
   entity.target = event.params.target
   entity.initiator = event.params.initiator
@@ -75,6 +77,7 @@ export function handleLiquidateERC20(event: LiquidateERC20): void {
   let entity = new PoolCoreLiquidateERC20Entity(ID);
   entity.block = event.block.number;
   entity.msgSender = event.transaction.from;
+  entity.msgValue = event.transaction.value;
   entity.transactionHash = event.transaction.hash;
   entity.collateralAsset = event.params.collateralAsset
   entity.liquidationAsset = event.params.liquidationAsset
@@ -95,6 +98,7 @@ export function handleLiquidateERC721(event: LiquidateERC721): void {
   let entity = new PoolCoreLiquidateERC721Entity(ID);
   entity.block = event.block.number;
   entity.msgSender = event.transaction.from;
+  entity.msgValue = event.transaction.value;
   entity.transactionHash = event.transaction.hash;
   entity.collateralAsset = event.params.collateralAsset
   entity.liquidationAsset = event.params.liquidationAsset
@@ -115,6 +119,7 @@ export function handleRepay(event: Repay): void {
   let entity = new PoolCoreRepayEntity(ID);
   entity.block = event.block.number;
   entity.msgSender = event.transaction.from;
+  entity.msgValue = event.transaction.value;
   entity.transactionHash = event.transaction.hash;
   entity.reserve = event.params.reserve
   entity.user = event.params.user
@@ -133,6 +138,7 @@ export function handleReserveUsedAsCollateralDisabled(event: ReserveUsedAsCollat
   let entity = new PoolCoreReserveUsedAsCollateralDisabledEntity(ID);
   entity.block = event.block.number;
   entity.msgSender = event.transaction.from;
+  entity.msgValue = event.transaction.value;
   entity.transactionHash = event.transaction.hash;
   entity.reserve = event.params.reserve
   entity.user = event.params.user
@@ -148,6 +154,7 @@ export function handleReserveUsedAsCollateralEnabled(event: ReserveUsedAsCollate
   let entity = new PoolCoreReserveUsedAsCollateralEnabledEntity(ID);
   entity.block = event.block.number;
   entity.msgSender = event.transaction.from;
+  entity.msgValue = event.transaction.value;
   entity.transactionHash = event.transaction.hash;
   entity.reserve = event.params.reserve
   entity.user = event.params.user
@@ -163,6 +170,7 @@ export function handleSupply(event: Supply): void {
   let entity = new PoolCoreSupplyEntity(ID);
   entity.block = event.block.number;
   entity.msgSender = event.transaction.from;
+  entity.msgValue = event.transaction.value;
   entity.transactionHash = event.transaction.hash;
   entity.reserve = event.params.reserve
   entity.user = event.params.user
@@ -181,6 +189,7 @@ export function handleSupplyERC721(event: SupplyERC721): void {
   let entity = new PoolCoreSupplyERC721Entity(ID);
   entity.block = event.block.number;
   entity.msgSender = event.transaction.from;
+  entity.msgValue = event.transaction.value;
   entity.transactionHash = event.transaction.hash;
   entity.reserve = event.params.reserve
   entity.user = event.params.user
@@ -204,6 +213,7 @@ export function handleWithdraw(event: Withdraw): void {
   let entity = new PoolCoreWithdrawEntity(ID);
   entity.block = event.block.number;
   entity.msgSender = event.transaction.from;
+  entity.msgValue = event.transaction.value;
   entity.transactionHash = event.transaction.hash;
   entity.reserve = event.params.reserve
   entity.user = event.params.user
@@ -221,6 +231,7 @@ export function handleWithdrawERC721(event: WithdrawERC721): void {
   let entity = new PoolCoreWithdrawERC721Entity(ID);
   entity.block = event.block.number;
   entity.msgSender = event.transaction.from;
+  entity.msgValue = event.transaction.value;
   entity.transactionHash = event.transaction.hash;
   entity.reserve = event.params.reserve
   entity.user = event.params.user

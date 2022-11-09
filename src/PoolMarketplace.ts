@@ -24,6 +24,7 @@ export function handleAcceptBidWithCredit(event: AcceptBidWithCredit): void {
   let entity = new PoolMarketplaceAcceptBidWithCreditEntity(ID);
   entity.block = event.block.number;
   entity.msgSender = event.transaction.from;
+  entity.msgValue = event.transaction.value;
   entity.transactionHash = event.transaction.hash;
   entity.marketplaceId = event.params.marketplaceId
   entity.orderInfo = PoolMarketplaceAcceptBidWithCreditOrderInfo__factory(event.params.orderInfo, ID)
@@ -40,6 +41,7 @@ export function handleBuyWithCredit(event: BuyWithCredit): void {
   let entity = new PoolMarketplaceBuyWithCreditEntity(ID);
   entity.block = event.block.number;
   entity.msgSender = event.transaction.from;
+  entity.msgValue = event.transaction.value;
   entity.transactionHash = event.transaction.hash;
   entity.marketplaceId = event.params.marketplaceId
   entity.orderInfo = PoolMarketplaceBuyWithCreditOrderInfo__factory(event.params.orderInfo, ID)
