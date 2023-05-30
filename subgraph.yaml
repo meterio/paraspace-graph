@@ -6,9 +6,9 @@ dataSources:
     name: PoolCore
     network: goerli
     source:
-      address: "0xD496950582236b5E0DAE7fA13acc018492bE9c29"
+      address: "0xe7A001e09eB43128666B0a40D12b969F2894eca2"
       abi: Contract
-      startBlock: 7900000
+      startBlock: 9069000
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6
@@ -56,9 +56,9 @@ dataSources:
     name: PoolMarketplace
     network: goerli
     source:
-      address: "0xD496950582236b5E0DAE7fA13acc018492bE9c29"
+      address: "0xe7A001e09eB43128666B0a40D12b969F2894eca2"
       abi: Contract
-      startBlock: 7900000
+      startBlock: 9069000
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6
@@ -79,9 +79,9 @@ dataSources:
     name: PoolConfigurator
     network: goerli
     source:
-      address: "0xF8BA554C70f6dA7ac1699Ab35EE1C34C517eab56"
+      address: "0x335bc7D4198A0818322744259aC43dA395B9cd87"
       abi: Contract
-      startBlock: 7900000
+      startBlock: 9069000
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6
