@@ -4,7 +4,7 @@
   "scripts": {
     "codegen": "graph codegen",
     "build": "graph build",
-    "deploy": "graph deploy --node https://api.studio.thegraph.com/deploy/ paraspace-mm-graph",
+    "deploy": "graph deploy --node http://localhost:8020 meterio/paraspace-graph",
     "test": "graph test"
   },
   "dependencies": {
