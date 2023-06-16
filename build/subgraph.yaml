@@ -6,9 +6,9 @@ dataSources:
     name: PoolCore
     network: goerli
     source:
-      address: "0xD496950582236b5E0DAE7fA13acc018492bE9c29"
+      address: "0xF6d07265E9507233c5d0e524D146dF2794cE30c5"
       abi: Contract
-      startBlock: 7900000
+      startBlock: 8704648
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6
@@ -25,6 +25,7 @@ dataSources:
         - PoolCoreSupplyERC721Entity
         - PoolCoreWithdrawEntity
         - PoolCoreWithdrawERC721Entity
+        - SummaryData
       abis:
         - name: Contract
           file: PoolCore/abis/PoolCore.json
@@ -59,9 +60,9 @@ dataSources:
     name: PoolMarketplace
     network: goerli
     source:
-      address: "0xD496950582236b5E0DAE7fA13acc018492bE9c29"
+      address: "0xF6d07265E9507233c5d0e524D146dF2794cE30c5"
       abi: Contract
-      startBlock: 7900000
+      startBlock: 8704648
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6
@@ -84,7 +85,7 @@ dataSources:
     name: PoolConfigurator
     network: goerli
     source:
-      address: "0xF8BA554C70f6dA7ac1699Ab35EE1C34C517eab56"
+      address: "0xA6cFB25484A8a7330a2E7b9534c17319E630ca6c"
       abi: Contract
       startBlock: 7900000
     mapping:
@@ -145,3 +146,56 @@ dataSources:
         - event: XTokenUpgraded(indexed address,indexed address,indexed address)
           handler: handleXTokenUpgraded
       file: PoolConfigurator/PoolConfigurator.wasm
+  - kind: ethereum
+    name: TimeLock
+    network: goerli
+    source:
+      address: "0x1E78BD140a288fe61933608127C1d43e5424c018"
+      abi: Contract
+      startBlock: 8704638
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - SummaryData
+      abis:
+        - name: Contract
+          file: TimeLock/abis/TimeLock.json
+      eventHandlers:
+        - event: AgreementCreated(uint256,uint8,uint8,indexed address,uint256[],indexed
+            address,uint48)
+          handler: handleAgreementCreated
+        - event: AgreementClaimed(uint256,uint8,uint8,indexed address,uint256[],indexed address)
+          handler: handleAgreementClaimed
+      file: PoolCore/PoolCore.wasm
+  - kind: ethereum
+    name: ApeCoinStaking
+    network: goerli
+    source:
+      address: "0xeF37717B1807a253c6D140Aca0141404D23c26D4"
+      abi: Contract
+      startBlock: 8043900
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - SummaryData
+      abis:
+        - name: Contract
+          file: ApeCoinStaking/abis/ApeCoinStaking.json
+      eventHandlers:
+        - event: Deposit(indexed address,uint256,address)
+          handler: handleDeposit
+        - event: DepositNft(indexed address,indexed uint256,uint256,uint256)
+          handler: handleDepositNft
+        - event: DepositPairNft(indexed address,uint256,uint256,uint256,uint256)
+          handler: handleDepositPairNft
+        - event: Withdraw(indexed address,uint256,address)
+          handler: handleWithdraw
+        - event: WithdrawNft(indexed address,indexed uint256,uint256,address,uint256)
+          handler: handleWithdrawNft
+        - event: WithdrawPairNft(indexed address,uint256,uint256,uint256,uint256)
+          handler: handleWithdrawPairNft
+      file: ApeCoinStaking/ApeCoinStaking.wasm

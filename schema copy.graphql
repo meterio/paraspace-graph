@@ -1,0 +1,854 @@
+schema {
+  query: RootQuery
+  mutation: Mutation
+}
+
+directive @cacheControl(maxAge: Int, scope: CacheControlScope, inheritMaxAge: Boolean) on FIELD_DEFINITION | OBJECT | INTERFACE | UNION
+
+directive @oneField on INPUT_OBJECT
+
+type ApeWaitlistSummary {
+  totalCount: Int!
+}
+
+type ApeWaitlistDetail {
+  walletAddress: Address!
+  joined: Boolean!
+  twitter: String
+  email: String
+}
+
+type ApeWaitlistData {
+  summary: ApeWaitlistSummary!
+  detail: ApeWaitlistDetail!
+}
+
+input ApeCount {
+  bayc: Int!
+  bakc: Int!
+  mayc: Int!
+}
+
+type RootQuery {
+  apeWaitlistData(address: Address!): ApeWaitlistData!
+  autoCompoundHistory(filter: AutoCompoundHistoryFilter): [AutoCompoundHistory!]!
+  validatorExitInfos(walletAddress: Address!): [ValidatorExitInfo!]!
+  featureToggles: [FeatureToggle!]!
+  inLiquidationAccounts: [AccountInLiquidationInfo!]!
+  nearLiquidationAccounts: [AccountNearLiquidationInfo!]!
+  userInLiquidation(account: Address!): AccountInLiquidationInfo
+  liquidationInfoForAsset(contractAddress: Address!, identifierOrCriteria: String!): LiquidationInfoForAsset
+  liquidation(account: String): [Liquidation]! @deprecated(reason: "use inLiquidationAccounts or userInLiquidation instead")
+  nearLiquidation: [NearLiquidation]! @deprecated(reason: "use nearLiquidationAccounts instead")
+  assetLiquidation(contractAddress: String, identifierOrCriteria: String): AssetLiquidation @deprecated(reason: "use assetInLiquidation instead")
+  asset(contractAddress: Address!, identifierOrCriteria: String!): Asset @deprecated(reason: "change to use shopItemDetail instead")
+  collections: [Collection]
+  moonbird(tokenId: String): Moonbird
+  shopItems(contractAddress: Address!, marketplace: Marketplace!, filter: ShopItemsInputFilter, pageInfo: ContinuationPageInfo): ShopItems!
+  shopItemsOfParaSpace(contractAddress: Address!, filter: ShopItemsInputFilter, pageInfo: InputPageInfo): ShopItems!
+  shopListingWithProtocol(platform: Marketplace!, listings: [TokenListing!]!): [Listing!]!
+  shopItemDetail(contractAddress: Address!, identifierOrCriteria: String!): ShopItemDetail!
+  shopListings(filter: ShopListingsInputFilter): [Listing!]!
+  orders(filter: InputOrderFilter, sortBy: OrderSortBy, pageInfo: InputPageInfo): Orders
+  aggregatedOrders(filter: InputOrderFilter, sortBy: OrderSortBy, pageInfo: InputPageInfo): AggregatedOrders
+  paraSpaceListings(filter: InputOrderFilter): [ParaSpaceListing!]! @deprecated(reason: "use shopListings instead")
+  basicOrderInfo(assets: [SuppliedAssets!]!): [BasicOrderInfo!] @deprecated(reason: "shouldn't need it any more")
+  P2PApeStakingListings(listingType: Int!, filter: InputQueryP2PListingsFilter, pageInfo: InputPageInfo): [P2PApeStakingListing!]!
+  P2PApeStakingPositions(walletAddress: Address!): [P2PApeStakingPosition!]!
+  P2PApeStakingMatches(pageInfo: InputPageInfo): P2PApeStakingMatches!
+  P2PApeStakingMatchesSummary: P2PApeStakingMatchesSummary!
+  nftBasicInfos: [NftBasicInfo!]!
+  uniswapV3BasicInfos: [UniswapV3BasicInfo!]!
+  summary: SummaryData!
+  timelockQueues(filter: TimelockQueueFilter): [Timelock!]!
+}
+
+type Mutation {
+  joinApeWaitlist(address: Address!, count: ApeCount!, twitter: String!, email: String): ApeWaitlistData!
+  updateApeWaitlist(address: Address!, twitter: String!, email: String): ApeWaitlistData!
+  setValidatorRecipient(publicKey: String!, recipient: Address!, signature: String!): String!
+  updateAssetAuctionStatus(contractAddress: Address!, identifierOrCriteria: String!, auctionStatus: Int!): Boolean
+  removeAssetAuction(contractAddress: Address!, identifierOrCriteria: String!): Boolean
+  removeAccountAuctions(user: Address!, txHash: String!): Boolean
+  deleteListing(assets: [InputAsset]): deleteListingResult
+  createOrder(inputOrder: InputCreateOrder!): Order!
+  createOrders(inputOrders: [InputCreateOrder!]!): [Order!]!
+  cancelOrder(hash: String!): Order
+  cancelOrders(orderHashes: [String!]!): [Order]!
+  fulfillOrder(hash: String!, identifierOrCriteria: String!, newOwner: Address!): Order
+  fulfillListings(assets: [InputSuppliedAsset!]!): [Order]
+  createP2PApeStakingListings(inputListings: [InputCreateListing!]!): [P2PApeStakingListing!]!
+  cancelP2PApeStakingListing(listingHash: String!): P2PApeStakingListing!
+  matchP2PApeStakingListing(blockHeight: String!, matchedHash: String!, stakingType: Int!, matchedListings: InputMatchListings!): String!
+  unmatchP2PApeStakingListing(matchedHash: String!, blockHeight: String!): String!
+}
+
+type AutoCompoundHistory {
+  txHash: String!
+  nftPoolSymbol: String!
+  triggeredBy: String!
+  blockTimestamp: Timestamp!
+}
+
+input AutoCompoundHistoryFilter {
+  blockTimestampFrom: Timestamp
+  blockTimestampTo: Timestamp
+}
+
+type ValidatorExitInfo {
+  validatorIndex: String!
+  recipient: Address!
+  publicKey: String!
+  nftMintStatus: String!
+}
+
+type FeatureToggles {
+  enableOverallMaintenance: Boolean
+}
+
+type FeatureToggle {
+  name: String!
+  value: Boolean!
+}
+
+type Liquidation {
+  accountAddress: Address!
+  collateral: String!
+  debt: String!
+  healthFactor: Float!
+  nftHealthFactor: Float!
+  assets: [LiquidationAsset!]
+}
+
+type LiquidationAsset {
+  collectionName: String!
+  contractAddress: Address!
+  identifierOrCriteria: String!
+  auctionStatus: Int!
+  floorPrice: String!
+  floorPriceInUSD: Float!
+  currentPrice: String!
+  currentPriceInUSD: Float!
+  startTime: Float!
+  stepLinear: Float!
+  stepExp: Float!
+  tickLength: Float!
+  currentPriceMultiplier: Float!
+  maxPriceMultiplier: Float!
+  minPriceMultiplier: Float!
+  minExpPriceMultiplier: Float!
+  traitMultiplier: Float!
+}
+
+type AssetLiquidationAccountInfo {
+  address: Address!
+  collateral: String!
+  debt: String!
+  healthFactor: Float!
+  nftHealthFactor: Float!
+}
+
+type AssetLiquidation {
+  accountInfo: AssetLiquidationAccountInfo!
+  collectionName: String!
+  contractAddress: Address!
+  identifierOrCriteria: String!
+  auctionStatus: Int!
+  floorPrice: String!
+  floorPriceInUSD: Float!
+  currentPrice: String!
+  currentPriceInUSD: Float!
+  traitMultiplier: Float!
+}
+
+type NearLiquidation {
+  accountAddress: Address!
+  collateral: String!
+  debt: String!
+  healthFactor: Float!
+  nftHealthFactor: Float!
+  assets: [NearLiquidationAsset!]
+}
+
+union NearLiquidationAsset = NearLiquidationERC20Asset | NearLiquidationERC721Asset
+
+enum NearLiquidationAssetType {
+  ERC20
+  ERC721
+}
+
+type NearLiquidationERC20Asset {
+  type: NearLiquidationAssetType!
+  symbol: String!
+  amount: Float!
+  valueInUSD: Float!
+  decimal: Int!
+}
+
+type NearLiquidationERC721Asset {
+  type: NearLiquidationAssetType!
+  collectionName: String!
+  contractAddress: Address!
+  identifierOrCriteria: String!
+  floorPrice: String!
+  floorPriceInUSD: Float!
+  traitMultiplier: Float!
+}
+
+type ERC20AssetNearLiquidation {
+  type: NearLiquidationAssetType!
+  symbol: String!
+  amount: String!
+  valueInUSD: Float!
+  decimal: Int!
+}
+
+type ERC721AssetNearLiquidation {
+  type: NearLiquidationAssetType!
+  collectionName: String!
+  contractAddress: Address!
+  identifierOrCriteria: String!
+  floorPrice: String!
+  floorPriceInUSD: Float!
+  traitMultiplier: String!
+}
+
+union AssetNearLiquidation = ERC20AssetNearLiquidation | ERC721AssetNearLiquidation
+
+type AssetInLiquidation {
+  collectionName: String!
+  contractAddress: Address!
+  identifierOrCriteria: String!
+  auctionStatus: Int!
+  floorPrice: String!
+  floorPriceInUSD: Float!
+  currentPrice: String!
+  currentPriceInUSD: Float!
+  startTime: Timestamp!
+  stepLinear: Float!
+  stepExp: Float!
+  tickLength: Float!
+  currentPriceMultiplier: Float!
+  maxPriceMultiplier: Float!
+  minPriceMultiplier: Float!
+  minExpPriceMultiplier: Float!
+  traitMultiplier: String!
+}
+
+type LiquidationAccountInfo {
+  address: Address!
+  collateral: String!
+  debt: String!
+  healthFactor: Float!
+  nftHealthFactor: Float!
+}
+
+type AccountInLiquidationInfo {
+  accountInfo: LiquidationAccountInfo!
+  assets: [AssetInLiquidation!]!
+}
+
+type AccountNearLiquidationInfo {
+  accountInfo: LiquidationAccountInfo!
+  assets: [AssetNearLiquidation]!
+}
+
+type LiquidationInfoForAsset {
+  accountInfo: LiquidationAccountInfo!
+  asset: AssetInLiquidation!
+}
+
+enum CacheControlScope {
+  PUBLIC
+  PRIVATE
+}
+
+type PaymentToken {
+  symbol: String!
+  address: Address!
+}
+
+type Fees {
+  seller_fees: JSON
+  paraspace_fees: JSON
+}
+
+type Asset {
+  identifierOrCriteria: String!
+  imageUrl: String
+  contractAddress: Address
+  collection: Collection
+  ownedBy: String
+  listings: [Listing]
+  price: String
+  currency: String
+  startTime: Timestamp
+  endTime: Timestamp
+  platform: String
+  traits: [Traits]
+  topOffer: Order
+  listingTime: Timestamp
+  lastPriceCurrency: String
+  lastPrice: String
+  listedOn: Marketplace
+  multiplier: Float
+  isSupplied: Boolean!
+  protocolVersion: String
+  chainId: Int
+  protocolContract: String
+}
+
+union ShopListingByPlatform = Listing | ReservoirListing
+
+type ShopItems {
+  items: [ShopItem]!
+  continuation: String
+}
+
+type ShopItem {
+  contractAddress: Address!
+  identifierOrCriteria: String!
+  ownedBy: Address
+  multiplier: Float
+  isSupplied: Boolean!
+  lowestPriceListing: ShopListingByPlatform
+  topOffer: Order
+}
+
+type ReservoirListing {
+  orderHash: String!
+  identifierOrCriteria: String!
+  contractAddress: Address!
+  price: Float! @deprecated(reason: "change type to string, use listingPrice instead")
+  listingPrice: String!
+  currency: String!
+  platform: String!
+  listingTime: Timestamp!
+  endTime: Timestamp! @deprecated(reason: "duplicate, use expirationTime instead")
+  expirationTime: Timestamp!
+}
+
+type Traits {
+  type: String
+  value: String
+  traitCount: String
+}
+
+type Listing {
+  contractAddress: Address!
+  identifierOrCriteria: String!
+  orderHash: String!
+  platform: String!
+  price: Float! @deprecated(reason: "change type to string, use listingPrice instead")
+  listingPrice: String!
+  currency: String!
+  startTime: Timestamp @deprecated(reason: "duplicate, use listingTime instead")
+  endTime: Timestamp! @deprecated(reason: "duplicate, use expirationTime instead")
+  protocolData: ProtocolData
+  listingTime: Timestamp!
+  expirationTime: Timestamp!
+  protocolVersion: String
+  chainId: Int
+  protocolContract: String
+  maker: Address!
+  toPrivate: Address
+}
+
+type ProtocolData {
+  signature: String
+  parameters: Parameters
+}
+
+type Parameters {
+  salt: String
+  zone: String
+  offer: [ParametersOffer]
+  counter: String
+  endTime: Timestamp
+  offerer: String
+  zoneHash: String
+  orderType: Int
+  startTime: Timestamp
+  conduitKey: String
+  consideration: [ParametersConsideration]
+  totalOriginalConsiderationItems: Int
+}
+
+type ParametersOffer {
+  token: String
+  itemType: Int
+  endAmount: String
+  recipient: String
+  startAmount: String
+  identifierOrCriteria: String
+}
+
+type ParametersConsideration {
+  token: String
+  itemType: Int
+  endAmount: String
+  recipient: String
+  startAmount: String
+  identifierOrCriteria: String
+}
+
+type Collection {
+  name: String!
+  itemCount: Int!
+  contractAddress: Address!
+  description: String
+  marketCap: Float!
+  symbol: String!
+  externalUrl: String
+  imageUrl: String
+  standard: String
+  paymentTokens: [PaymentToken!]!
+  fees: Fees
+  topCollectionOffer: Order
+  totalListedNFTs: totalListedNFTsCount
+}
+
+type totalListedNFTsCount {
+  count: Int
+}
+
+type Moonbird {
+  nesting: Nesting
+}
+
+type Nesting {
+  nested: Boolean
+  currentNestingPeriodStartedAt: String
+  nestLevel: String
+  currentNestLevelStartedAt: String
+  nextNestLevelAt: String
+  nestProgress: Float
+  totalDuration: Int
+  currentDuration: Int
+}
+
+type ShopItemDetail {
+  identifierOrCriteria: String!
+  contractAddress: Address!
+  ownedBy: Address
+  traits: [Traits]
+  multiplier: Float
+  isSupplied: Boolean!
+  listings: [ShopListingByPlatform]!
+  collection: Collection
+  topOffer: Order
+}
+
+enum Marketplace {
+  OpenSea
+  ParaSpace
+  Blur
+}
+
+input InputPageInfo {
+  limit: Int!
+  offset: Int!
+}
+
+input ContinuationPageInfo {
+  limit: Int!
+  continuation: String
+}
+
+input TokenListing {
+  orderHash: String!
+  contractAddress: Address!
+  identifierOrCriteria: String!
+}
+
+input InputAsset {
+  contractAddress: Address!
+  identifierOrCriteria: String!
+}
+
+type deleteListingResult {
+  message: String!
+}
+
+enum ShopItemSort {
+  PriceDesc
+  PriceAsc
+}
+
+input ShopItemsInputFilter {
+  identifierOrCriteria: String
+  minPrice: Float
+  maxPrice: Float
+  sort: ShopItemSort
+}
+
+enum ShopListingSort {
+  PriceDesc
+  PriceAsc
+  Newest
+  Oldest
+}
+
+input ShopListingsInputFilter {
+  orderHashes: [String!]
+  assets: [InputAsset!]
+  makers: [Address!]
+  sort: ShopListingSort
+  lowestListing: Boolean
+}
+
+input NumberLikeFilter {
+  equal: String
+  gt: String
+  gte: String
+  lt: String
+  lte: String
+  ne: String
+}
+
+enum OrderStatus {
+  Finalized
+  Cancelled
+  Ready
+  Invalid
+}
+
+input SuppliedAssets {
+  contractAddress: Address!
+  identifiers: [String!]!
+}
+
+input InputOrderFilter {
+  assets: [SuppliedAssets!]
+  hash: String
+  maker: Address
+  taker: Address
+  status: OrderStatus
+  startTime: NumberLikeFilter
+  contractAddress: Address
+  identifierOrCriteria: String
+  lowestUSDRank: Boolean
+  highestUSDRank: Boolean
+  side: Int
+}
+
+enum OrderSortBy {
+  StartTimeDesc
+  OfferValueDesc
+  OfferValueAsc
+}
+
+type CreditDataSignature {
+  v: String!
+  r: String!
+  s: String!
+}
+
+type CreditData {
+  token: Address!
+  amount: String!
+  orderId: String!
+  vrs: CreditDataSignature!
+}
+
+type Order {
+  hash: String!
+  taker: Address
+  maker: Address!
+  offerItems: [ParametersOffer!]!
+  considerationItems: [ParametersConsideration!]!
+  creditData: CreditData
+  startTime: Timestamp! @deprecated(reason: "duplicate, use listingTime instead")
+  listingTime: Timestamp!
+  expirationTime: Timestamp!
+  offerValue: String
+  status: OrderStatus!
+  protocolData: ProtocolData!
+  to: Address
+  target: OrderTarget!
+  protocolVersion: String
+  chainId: Int
+  protocolContract: String
+  toPrivate: Address
+}
+
+type AggregatedOrderNode {
+  identifierOrCriteria: String!
+  contractAddress: Address!
+  aggregatedOrder: Order!
+}
+
+type AggregatedOrder {
+  totalCount: Int!
+  node: AggregatedOrderNode!
+}
+
+type AggregatedOrders {
+  totalCount: Int!
+  nodes: [AggregatedOrder!]!
+}
+
+type Orders {
+  totalCount: Int!
+  nodes: [Order!]!
+}
+
+type ParaSpaceListing {
+  contractAddress: Address!
+  identifierOrCriteria: String!
+  protocolData: ProtocolData!
+  amount: String!
+  currency: String!
+  currencyAddress: Address!
+  startTime: Timestamp!
+  expirationTime: Timestamp!
+  maker: Address!
+  protocolVersion: String
+  chainId: Int
+  protocolContract: String
+}
+
+type BasicOrderInfo {
+  contractAddress: Address!
+  identifierOrCriteria: String!
+  totalOffers: Int!
+  topOffer: Order
+  lowestListing: ParaSpaceListing
+}
+
+input InputOfferOrConsiderationItem {
+  itemType: Int!
+  token: Address!
+  identifierOrCriteria: String!
+  startAmount: String!
+  endAmount: String!
+  recipient: String
+}
+
+input InputProtocolData {
+  parameters: InputOrderParameters!
+  signature: String!
+}
+
+enum OrderTarget {
+  Collection
+  Token
+}
+
+input InputCreateOrder {
+  protocolData: InputProtocolData!
+  creditData: InputCreditData
+  target: OrderTarget
+  side: Int!
+  protocolVersion: String!
+  protocolContract: String!
+  toPrivate: Address
+}
+
+input InputOrderParameters {
+  offerer: Address!
+  zone: String!
+  zoneHash: String!
+  startTime: Timestamp!
+  endTime: Timestamp!
+  orderType: Int!
+  salt: String!
+  conduitKey: String!
+  counter: String!
+  offer: [InputOfferOrConsiderationItem]!
+  consideration: [InputOfferOrConsiderationItem]!
+  totalOriginalConsiderationItems: Int!
+}
+
+input InputCreditDataSignature {
+  v: String!
+  r: String!
+  s: String!
+}
+
+input InputCreditData {
+  token: Address!
+  amount: String!
+  orderId: String!
+  vrs: InputCreditDataSignature!
+}
+
+input InputSuppliedAsset {
+  contractAddress: Address!
+  newOwner: Address!
+  identifierOrCriteria: String!
+}
+
+input FilterIntCondition {
+  eq: Int
+  not: Int
+}
+
+input FilterStringCondition {
+  eq: String
+  not: String
+  in: [String!]
+}
+
+type P2PApeStakingListing {
+  listingHash: String!
+  token: Address!
+  tokenId: Int!
+  share: Int!
+  offerer: Address!
+  stakingType: Int!
+  startTime: Int!
+  endTime: Int!
+  v: Int!
+  r: String!
+  s: String!
+}
+
+type P2PApeStakingPosition {
+  matchedHash: String
+  blockHeight: String
+  matched: Boolean!
+  apeListing: P2PApeStakingListing
+  apeCoinListing: P2PApeStakingListing
+  bakcListing: P2PApeStakingListing
+}
+
+type P2PApeStakingMatchPair {
+  matchedHash: String!
+  apeListing: P2PApeStakingListing!
+  apeCoinListing: P2PApeStakingListing!
+  bakcListing: P2PApeStakingListing
+}
+
+type P2PApeStakingMatches {
+  nodes: [P2PApeStakingMatchPair!]!
+  totalCount: Int!
+}
+
+type P2PApeStakingMatchesSummary {
+  totalActiveMatches: Int!
+  totalBAYCStaked: Int!
+  totalMAYCStaked: Int!
+  totalBAKCStaked: Int!
+}
+
+input InputQueryP2PListingsFilter {
+  stakingType: FilterIntCondition
+  token: FilterStringCondition
+  offerer: FilterStringCondition
+}
+
+input InputCreateListing {
+  listingHash: String
+  token: Address!
+  tokenId: Int!
+  share: Int!
+  offerer: Address!
+  stakingType: Int!
+  startTime: Int!
+  endTime: Int!
+  v: Float!
+  r: String!
+  s: String!
+}
+
+input InputMatchListings {
+  apeListing: InputCreateListing!
+  apeCoinListing: InputCreateListing!
+  bakcListing: InputCreateListing
+}
+
+type NftBasicInfo {
+  symbol: String!
+  address: Address!
+  variableDebtTokenAddress: Address!
+  xTokenAddress: Address!
+  priceInUsd: String!
+  priceInETH: String!
+  supplyApyRate: String!
+  supplyRewardRate: String!
+  borrowApyRate: String!
+  borrowingEnabled: Boolean!
+  borrowRewardRate: String!
+  borrowUp: String!
+  availableLiquidity: String!
+  decimals: Int!
+  baseLTVasCollateral: String!
+  reserveLiquidationThreshold: String!
+  totalLiquidityUSD: String!
+  totalDebt: String!
+  totalDebtUSD: String!
+  totalSupplied: String!
+  totalUsd: String!
+}
+
+type UniswapV3BasicInfo {
+  name: String!
+  token0Symbol: String!
+  token0Address: Address
+  token1Symbol: String!
+  token1Address: Address
+  totalSupplied: String!
+  totalUsd: String!
+  ltv: String!
+}
+
+type LendingSummary {
+  totalSuppliedNFT: String!
+  totalSupply: String!
+  totalBorrow: String!
+}
+
+type ApeStakingSummary {
+  baycStaked: String!
+  maycStaked: String!
+  bakcStaked: String!
+  apeCoinStaked: String!
+}
+
+type LiquidationSummary {
+  inLiquidation: String!
+  inAuction: String!
+}
+
+type ShopSummary {
+  availableNFT: String!
+  purchased: String!
+  volume: String!
+}
+
+type SummaryData {
+  apeStaking: ApeStakingSummary
+  liquidation: LiquidationSummary
+  shop: ShopSummary
+  lending: LendingSummary
+}
+
+"""Address custom scalar type"""
+scalar Address
+
+scalar Timestamp
+
+scalar JSON
+
+input TimelockQueueFilter {
+  address: Address
+}
+
+type TimelockAssetInfo {
+  type: Int!
+  token: Address!
+  tokenIds: [Int!]
+  amount: String
+}
+
+type Timelock {
+  blockHeight: Int!
+  agreementId: Int!
+  timeAdded: Timestamp!
+  actionType: Int!
+  assetInfo: TimelockAssetInfo!
+  transaction: String!
+  expectedRelease: Timestamp!
+  status: Int!
+}

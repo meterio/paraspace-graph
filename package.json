@@ -4,11 +4,11 @@
   "scripts": {
     "codegen": "graph codegen",
     "build": "graph build",
-    "deploy": "graph deploy --node http://localhost:8020 meterio/paraspace-graph",
+    "deploy": "graph deploy --studio meterspace",
     "test": "graph test"
   },
   "dependencies": {
-    "@graphprotocol/graph-cli": "0.34.0",
+    "@graphprotocol/graph-cli": "^0.51.0",
     "@graphprotocol/graph-ts": "0.28.0"
   },
   "devDependencies": {

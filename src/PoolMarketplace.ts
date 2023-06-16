@@ -11,7 +11,7 @@ import {
   PoolMarketplaceAcceptBidWithCreditCredit__factory,
   PoolMarketplaceBuyWithCreditOrderInfo__factory,
   PoolMarketplaceBuyWithCreditCredit__factory,
-} from "./factories"
+} from "./factories";
 import { log } from "@graphprotocol/graph-ts";
 
 export function handleAcceptBidWithCredit(event: AcceptBidWithCredit): void {
@@ -26,9 +26,15 @@ export function handleAcceptBidWithCredit(event: AcceptBidWithCredit): void {
   entity.msgSender = event.transaction.from;
   entity.msgValue = event.transaction.value;
   entity.transactionHash = event.transaction.hash;
-  entity.marketplaceId = event.params.marketplaceId
-  entity.orderInfo = PoolMarketplaceAcceptBidWithCreditOrderInfo__factory(event.params.orderInfo, ID)
-  entity.credit = PoolMarketplaceAcceptBidWithCreditCredit__factory(event.params.credit, ID)
+  entity.marketplaceId = event.params.marketplaceId;
+  entity.orderInfo = PoolMarketplaceAcceptBidWithCreditOrderInfo__factory(
+    event.params.orderInfo,
+    ID
+  );
+  entity.credit = PoolMarketplaceAcceptBidWithCreditCredit__factory(
+    event.params.credit,
+    ID
+  );
   entity.save();
 }
 export function handleBuyWithCredit(event: BuyWithCredit): void {
@@ -43,8 +49,14 @@ export function handleBuyWithCredit(event: BuyWithCredit): void {
   entity.msgSender = event.transaction.from;
   entity.msgValue = event.transaction.value;
   entity.transactionHash = event.transaction.hash;
-  entity.marketplaceId = event.params.marketplaceId
-  entity.orderInfo = PoolMarketplaceBuyWithCreditOrderInfo__factory(event.params.orderInfo, ID)
-  entity.credit = PoolMarketplaceBuyWithCreditCredit__factory(event.params.credit, ID)
+  entity.marketplaceId = event.params.marketplaceId;
+  entity.orderInfo = PoolMarketplaceBuyWithCreditOrderInfo__factory(
+    event.params.orderInfo,
+    ID
+  );
+  entity.credit = PoolMarketplaceBuyWithCreditCredit__factory(
+    event.params.credit,
+    ID
+  );
   entity.save();
 }
