@@ -4,12 +4,9 @@ import {
 } from "../generated/TimeLock/Contract";
 import {
   Borrow,
-  FlashClaim,
   LiquidateERC20,
   LiquidateERC721,
   Repay,
-  ReserveUsedAsCollateralDisabled,
-  ReserveUsedAsCollateralEnabled,
   Supply,
   SupplyERC721,
   Withdraw,
@@ -18,337 +15,102 @@ import {
 import {
   TimelockAssetInfo,
   Timelock,
-  PoolCoreBorrowEntity,
-  PoolCoreFlashClaimEntity,
-  PoolCoreLiquidateERC20Entity,
-  PoolCoreLiquidateERC721Entity,
-  PoolCoreRepayEntity,
-  PoolCoreReserveUsedAsCollateralDisabledEntity,
-  PoolCoreReserveUsedAsCollateralEnabledEntity,
-  PoolCoreSupplyEntity,
-  PoolCoreSupplyERC721Entity,
-  PoolCoreWithdrawEntity,
-  PoolCoreWithdrawERC721Entity,
   Asset,
-  Account,
+  AssetPrice,
+  AccountAssets,
 } from "../generated/schema";
-import { PoolCoreSupplyERC721TokenData__factory } from "./factories";
-import { log } from "@graphprotocol/graph-ts";
-import { ONE_BI, ZERO_BI } from "./constants";
+import { ethereum, BigInt } from "@graphprotocol/graph-ts";
+import { ZERO_BI } from "./constants";
+import {
+  handleUser,
+  handleAsset,
+  handlePrices,
+  checkHealth,
+  addHolder,
+  removeHolder,
+} from "./helper";
+
+export function handleBlock(block: ethereum.Block): void {
+  let number = block.number;
+  if (number.mod(BigInt.fromI32(100)).equals(ZERO_BI)) {
+    handlePrices();
+  }
+}
+export function handleLiquidateERC20(event: LiquidateERC20): void {}
+export function handleLiquidateERC721(event: LiquidateERC721): void {}
 
 export function handleBorrow(event: Borrow): void {
-  const ID = `${event.transaction.hash.toHex()}-${event.transactionLogIndex.toString()}`;
-
-  if (!!PoolCoreBorrowEntity.load(ID)) {
-    log.warning("Entity({}) exists!", [ID]);
-  }
-
-  let entity = new PoolCoreBorrowEntity(ID);
-  entity.block = event.block.number;
-  entity.msgSender = event.transaction.from;
-  entity.msgValue = event.transaction.value;
-  entity.transactionHash = event.transaction.hash;
-  entity.reserve = event.params.reserve;
-  entity.user = event.params.user;
-  entity.onBehalfOf = event.params.onBehalfOf;
-  entity.amount = event.params.amount;
-  entity.borrowRate = event.params.borrowRate;
-  entity.referralCode = event.params.referralCode;
-  entity.save();
+  let user = handleUser(event.params.user);
+  let accountAsset = handleAsset(
+    event.params.user,
+    event.params.reserve,
+    ZERO_BI,
+    event.params.amount
+  );
+  let assets = user.debtAssets;
+  assets.push(accountAsset.id);
+  user.debtAssets = assets;
+  user.save();
+  addHolder(event.params.reserve, event.params.user);
 }
-export function handleFlashClaim(event: FlashClaim): void {
-  const ID = `${event.transaction.hash.toHex()}-${event.transactionLogIndex.toString()}`;
 
-  if (!!PoolCoreFlashClaimEntity.load(ID)) {
-    log.warning("Entity({}) exists!", [ID]);
-  }
-
-  let entity = new PoolCoreFlashClaimEntity(ID);
-  entity.block = event.block.number;
-  entity.msgSender = event.transaction.from;
-  entity.msgValue = event.transaction.value;
-  entity.transactionHash = event.transaction.hash;
-  entity.target = event.params.target;
-  entity.initiator = event.params.initiator;
-  entity.nftAsset = event.params.nftAsset;
-  entity.tokenId = event.params.tokenId;
-  entity.save();
-}
-export function handleLiquidateERC20(event: LiquidateERC20): void {
-  const ID = `${event.transaction.hash.toHex()}-${event.transactionLogIndex.toString()}`;
-
-  if (!!PoolCoreLiquidateERC20Entity.load(ID)) {
-    log.warning("Entity({}) exists!", [ID]);
-  }
-
-  let entity = new PoolCoreLiquidateERC20Entity(ID);
-  entity.block = event.block.number;
-  entity.msgSender = event.transaction.from;
-  entity.msgValue = event.transaction.value;
-  entity.transactionHash = event.transaction.hash;
-  entity.collateralAsset = event.params.collateralAsset;
-  entity.liquidationAsset = event.params.liquidationAsset;
-  entity.borrower = event.params.borrower;
-  entity.liquidationAmount = event.params.liquidationAmount;
-  entity.liquidatedCollateralAmount = event.params.liquidatedCollateralAmount;
-  entity.liquidator = event.params.liquidator;
-  entity.receivePToken = event.params.receivePToken;
-  entity.save();
-}
-export function handleLiquidateERC721(event: LiquidateERC721): void {
-  const ID = `${event.transaction.hash.toHex()}-${event.transactionLogIndex.toString()}`;
-
-  if (!!PoolCoreLiquidateERC721Entity.load(ID)) {
-    log.warning("Entity({}) exists!", [ID]);
-  }
-
-  let entity = new PoolCoreLiquidateERC721Entity(ID);
-  entity.block = event.block.number;
-  entity.msgSender = event.transaction.from;
-  entity.msgValue = event.transaction.value;
-  entity.transactionHash = event.transaction.hash;
-  entity.collateralAsset = event.params.collateralAsset;
-  entity.liquidationAsset = event.params.liquidationAsset;
-  entity.borrower = event.params.borrower;
-  entity.liquidationAmount = event.params.liquidationAmount;
-  entity.liquidatedCollateralTokenId = event.params.liquidatedCollateralTokenId;
-  entity.liquidator = event.params.liquidator;
-  entity.receiveNToken = event.params.receiveNToken;
-  entity.save();
-}
 export function handleRepay(event: Repay): void {
-  const ID = `${event.transaction.hash.toHex()}-${event.transactionLogIndex.toString()}`;
-
-  if (!!PoolCoreRepayEntity.load(ID)) {
-    log.warning("Entity({}) exists!", [ID]);
+  let accountAsset = handleAsset(
+    event.params.user,
+    event.params.reserve,
+    ZERO_BI,
+    ZERO_BI.minus(event.params.amount)
+  );
+  if (accountAsset.amount.equals(ZERO_BI)) {
+    accountAsset.unset(accountAsset.id);
   }
-
-  let entity = new PoolCoreRepayEntity(ID);
-  entity.block = event.block.number;
-  entity.msgSender = event.transaction.from;
-  entity.msgValue = event.transaction.value;
-  entity.transactionHash = event.transaction.hash;
-  entity.reserve = event.params.reserve;
-  entity.user = event.params.user;
-  entity.repayer = event.params.repayer;
-  entity.amount = event.params.amount;
-  entity.usePTokens = event.params.usePTokens;
-  entity.save();
-}
-export function handleReserveUsedAsCollateralDisabled(
-  event: ReserveUsedAsCollateralDisabled
-): void {
-  const ID = `${event.transaction.hash.toHex()}-${event.transactionLogIndex.toString()}`;
-
-  if (!!PoolCoreReserveUsedAsCollateralDisabledEntity.load(ID)) {
-    log.warning("Entity({}) exists!", [ID]);
-  }
-
-  let entity = new PoolCoreReserveUsedAsCollateralDisabledEntity(ID);
-  entity.block = event.block.number;
-  entity.msgSender = event.transaction.from;
-  entity.msgValue = event.transaction.value;
-  entity.transactionHash = event.transaction.hash;
-  entity.reserve = event.params.reserve;
-  entity.user = event.params.user;
-  entity.save();
-}
-export function handleReserveUsedAsCollateralEnabled(
-  event: ReserveUsedAsCollateralEnabled
-): void {
-  const ID = `${event.transaction.hash.toHex()}-${event.transactionLogIndex.toString()}`;
-
-  if (!!PoolCoreReserveUsedAsCollateralEnabledEntity.load(ID)) {
-    log.warning("Entity({}) exists!", [ID]);
-  }
-
-  let entity = new PoolCoreReserveUsedAsCollateralEnabledEntity(ID);
-  entity.block = event.block.number;
-  entity.msgSender = event.transaction.from;
-  entity.msgValue = event.transaction.value;
-  entity.transactionHash = event.transaction.hash;
-  entity.reserve = event.params.reserve;
-  entity.user = event.params.user;
-  entity.save();
 }
 export function handleSupply(event: Supply): void {
-  const ID = `${event.transaction.hash.toHex()}-${event.transactionLogIndex.toString()}`;
+  let user = handleUser(event.params.user);
+  let accountAsset = handleAsset(
+    event.params.user,
+    event.params.reserve,
+    ZERO_BI,
+    event.params.amount
+  );
 
-  if (!!PoolCoreSupplyEntity.load(ID)) {
-    log.warning("Entity({}) exists!", [ID]);
-  }
-
-  let entity = new PoolCoreSupplyEntity(ID);
-  entity.block = event.block.number;
-  entity.msgSender = event.transaction.from;
-  entity.msgValue = event.transaction.value;
-  entity.transactionHash = event.transaction.hash;
-  entity.reserve = event.params.reserve;
-  entity.user = event.params.user;
-  entity.onBehalfOf = event.params.onBehalfOf;
-  entity.amount = event.params.amount;
-  entity.referralCode = event.params.referralCode;
-  entity.save();
-
-  let userId = event.params.user.toHexString();
-  let user = Account.load(userId);
-  if (!user) {
-    user = new Account(userId);
-    user.address = event.params.user;
-    user.collateral = ZERO_BI;
-    user.collateralAssets = [];
-    user.debt = ZERO_BI;
-    user.debtAssets = [];
-    user.healthFactor = ZERO_BI;
-  }
-
-  const assetId = `${event.params.user.toHexString()}-${event.params.reserve.toHexString()}`;
-  let asset = Asset.load(assetId);
-  if (!asset) {
-    asset = new Asset(assetId);
-    asset.token = event.params.reserve;
-    asset.tokenId = ZERO_BI;
-    asset.amount = ZERO_BI;
-    asset.inPool = false;
-    asset.inStake = false;
-    let assets = user.collateralAssets;
-    assets.push(asset.id);
-    user.collateralAssets = assets;
-  }
-  asset.amount = asset.amount.plus(event.params.amount);
-  asset.save();
+  let assets = user.collateralAssets;
+  assets.push(accountAsset.id);
+  user.collateralAssets = assets;
   user.save();
+  addHolder(event.params.reserve, event.params.user);
 }
 export function handleSupplyERC721(event: SupplyERC721): void {
-  const ID = `${event.transaction.hash.toHex()}-${event.transactionLogIndex.toString()}`;
-
-  if (!!PoolCoreSupplyERC721Entity.load(ID)) {
-    log.warning("Entity({}) exists!", [ID]);
-  }
-
-  let entity = new PoolCoreSupplyERC721Entity(ID);
-  entity.block = event.block.number;
-  entity.msgSender = event.transaction.from;
-  entity.msgValue = event.transaction.value;
-  entity.transactionHash = event.transaction.hash;
-  entity.reserve = event.params.reserve;
-  entity.user = event.params.user;
-  entity.onBehalfOf = event.params.onBehalfOf;
-  entity.tokenData = [];
-  for (let i = 0; i < event.params.tokenData.length; i++) {
-    const e = event.params.tokenData[i];
-    entity.tokenData.push(
-      PoolCoreSupplyERC721TokenData__factory(e, ID + i.toString())
-    );
-  }
-  entity.referralCode = event.params.referralCode;
-  entity.fromNToken = event.params.fromNToken;
-  entity.save();
-
-  let userId = event.params.user.toHexString();
-  let user = Account.load(userId);
-  if (!user) {
-    user = new Account(userId);
-    user.address = event.params.user;
-    user.collateral = ZERO_BI;
-    user.collateralAssets = [];
-    user.debt = ZERO_BI;
-    user.debtAssets = [];
-    user.healthFactor = ZERO_BI;
-  }
-
-  for (let i = 0; i < event.params.tokenData.length; i++) {
-    let assetId = `${event.params.reserve.toHexString()}-${
-      event.params.tokenData[i].tokenId
-    }`;
-    let asset = Asset.load(assetId);
-    if (!asset) {
-      asset = new Asset(assetId);
-      asset.token = event.params.reserve;
-      asset.tokenId = event.params.tokenData[i].tokenId;
-      asset.amount = ONE_BI;
-      asset.inPool = false;
-      asset.inStake = false;
-    }
-    let assets = user.collateralAssets;
-    assets.push(asset.id);
-    user.collateralAssets = assets;
-    asset.inPool = true;
-    asset.save();
-  }
+  let user = handleUser(event.params.user);
+  let accountAsset = handleAsset(
+    event.params.user,
+    event.params.reserve,
+    event.params.tokenData[0].tokenId,
+    ZERO_BI
+  );
+  let assets = user.collateralAssets;
+  assets.push(accountAsset.id);
+  user.collateralAssets = assets;
   user.save();
+  addHolder(event.params.reserve, event.params.user);
 }
 export function handleWithdraw(event: Withdraw): void {
-  const ID = `${event.transaction.hash.toHex()}-${event.transactionLogIndex.toString()}`;
-
-  if (!!PoolCoreWithdrawEntity.load(ID)) {
-    log.warning("Entity({}) exists!", [ID]);
-  }
-
-  let entity = new PoolCoreWithdrawEntity(ID);
-  entity.block = event.block.number;
-  entity.msgSender = event.transaction.from;
-  entity.msgValue = event.transaction.value;
-  entity.transactionHash = event.transaction.hash;
-  entity.reserve = event.params.reserve;
-  entity.user = event.params.user;
-  entity.to = event.params.to;
-  entity.amount = event.params.amount;
-  entity.save();
-
-  let userId = event.params.user.toHexString();
-  let user = Account.load(userId);
-  const assetId = `${event.params.user.toHexString()}-${event.params.reserve.toHexString()}`;
-  if (user) {
-    for (let i = 0; i < user.collateralAssets.length; i++) {
-      if (user.collateralAssets[i] == assetId) {
-        let asset = Asset.load(user.collateralAssets[i]);
-        if (asset) {
-          asset.amount = asset.amount.minus(event.params.amount);
-          asset.save();
-        }
-      }
-    }
-    user.save();
+  let accountAsset = handleAsset(
+    event.params.user,
+    event.params.reserve,
+    ZERO_BI,
+    ZERO_BI.minus(event.params.amount)
+  );
+  if (accountAsset.amount.equals(ZERO_BI)) {
+    accountAsset.unset(accountAsset.id);
   }
 }
 export function handleWithdrawERC721(event: WithdrawERC721): void {
-  const ID = `${event.transaction.hash.toHex()}-${event.transactionLogIndex.toString()}`;
-
-  if (!!PoolCoreWithdrawERC721Entity.load(ID)) {
-    log.warning("Entity({}) exists!", [ID]);
-  }
-
-  let entity = new PoolCoreWithdrawERC721Entity(ID);
-  entity.block = event.block.number;
-  entity.msgSender = event.transaction.from;
-  entity.msgValue = event.transaction.value;
-  entity.transactionHash = event.transaction.hash;
-  entity.reserve = event.params.reserve;
-  entity.user = event.params.user;
-  entity.to = event.params.to;
-  entity.tokenIds = event.params.tokenIds;
-  entity.save();
-
-  let userId = event.params.user.toHexString();
-  let user = Account.load(userId);
-  if (user) {
-    for (let i = 0; i < event.params.tokenIds.length; i++) {
-      let assetId = `${event.params.reserve.toHexString()}-${
-        event.params.tokenIds[i]
-      }`;
-      for (let j = 0; j < user.collateralAssets.length; j++) {
-        if (assetId == user.collateralAssets[j]) {
-          let asset = Asset.load(assetId);
-          if (asset) {
-            asset.amount = ZERO_BI;
-            asset.inPool = false;
-            asset.save();
-          }
-        }
-      }
-    }
-    user.save();
+  let ID = `${event.params.user}-${event.params.reserve}-${event.params.tokenIds}`;
+  let accountAsset = AccountAssets.load(ID);
+  if (accountAsset) {
+    accountAsset.unset(ID);
+    removeHolder(event.params.reserve, event.params.user);
   }
 }
 

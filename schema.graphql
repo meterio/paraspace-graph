@@ -397,6 +397,9 @@ type SummaryData @entity {
 type ApeStakingSummary @entity {
   id: ID!
   apeCoinStaked: BigInt!
+  baycStaked: BigInt!
+  maycStaked: BigInt!
+  bakcStaked: BigInt!
 }
 
 type DashboardStake @entity {
@@ -451,19 +454,86 @@ type TimelockAssetInfo @entity {
 
 type Asset @entity {
   id: ID!
-  token: Bytes!
-  tokenId: BigInt!
+  startTime: BigInt!
+  collectionName: String!
+  contractAddress: Bytes!
+  identifierOrCriteria: BigInt!
+  auctionStatus: BigInt!
+  currentPrice: BigInt!
+  currentPriceInUSD: BigDecimal!
+  floorPrice: BigInt!
+  floorPriceInUSD: BigInt!
+  stepLinear: BigInt!
+  stepExp: BigInt!
+  currentPriceMultiplier: BigInt!
+  maxPriceMultiplier: BigInt!
+  minPriceMultiplier: BigInt!
+  minExpPriceMultiplier: BigInt!
+  traitMultiplier: BigInt!
   amount: BigInt!
-  inPool: Boolean!
-  inStake: Boolean!
+  decimal: Int!
+}
+
+type AccountAssets @entity {
+  id: ID!
+  identifierOrCriteria: BigInt!
+  amount: BigInt!
+  asset: Asset!
 }
 
 type Account @entity {
   id: ID!
   address: Bytes!
-  collateral: BigInt!
-  collateralAssets: [Asset!]!
-  debt: BigInt!
-  debtAssets: [Asset!]!
-  healthFactor: BigInt!
+  collateralAssets: [AccountAssets!]!
+  debtAssets: [AccountAssets!]!
+}
+
+type AssetPrice @entity {
+  id: ID!
+  address: Bytes!
+  price: BigInt!
+  holders: [Holder!]!
+}
+
+type NearLiquidation @entity {
+  id: ID!
+  accountAddress: String!
+  collateral: BigDecimal!
+  debt: BigDecimal!
+  healthFactor: BigDecimal!
+  nftHealthFactor: BigDecimal!
+  erc20Assets: [NearLiquidationERC20Asset!]!
+  erc721Assets: [NearLiquidationERC721Asset!]!
+}
+
+type NearLiquidationERC721Asset @entity {
+  id: ID!
+  collectionName: String!
+  contractAddress: Bytes!
+  identifierOrCriteria: BigInt!
+  floorPrice: BigInt!
+  floorPriceInUSD: BigDecimal!
+  traitMultiplier: BigInt!
+}
+
+type NearLiquidationERC20Asset @entity {
+  id: ID!
+  symbol: String!
+  amount: BigDecimal!
+  valueInUSD: BigDecimal!
+  decimal: Int!
+}
+
+type AutoCompoundHistory @entity {
+  id: ID!
+  txHash: Bytes!
+  nftPoolSymbol: String!
+  triggeredBy: String!
+  blockTimestamp: BigInt!
+}
+
+type Holder @entity {
+  id: ID!
+  account: Bytes!
+  asset: Bytes!
 }
