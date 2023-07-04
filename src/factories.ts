@@ -21,7 +21,6 @@ import {
   BuyWithCreditOrderInfoStruct,
   BuyWithCreditCreditStruct,
 } from "../generated/PoolMarketplace/Contract";
-import {} from "../generated/PoolConfigurator/Contract";
 
 // PoolCore
 

@@ -10,26 +10,25 @@ import { DashboardStake } from "../generated/schema";
 import { Address, BigInt } from "@graphprotocol/graph-ts";
 import {
   ZERO_BI,
-  getAddress,
+  nBAYC,
+  nMAYC,
+  nBAKC,
+  P2PPairStaking,
+  cAPE,
 } from "./constants";
 import { handleAllStake, handleAutoCompound } from "./helper";
 
 export function handleDeposit(event: Deposit): void {
-  if (
-    event.params.user == Address.fromString(getAddress("cAPE"))
-  ) {
+  if (event.params.user == Address.fromString(cAPE)) {
     handleAllStake();
     handleAutoCompound(event);
   }
 }
 export function handleDepositNft(event: DepositNft): void {
   if (
-    event.params.user ==
-      Address.fromString(getAddress("nBAYC")) ||
-    event.params.user ==
-      Address.fromString(getAddress("nMAYC")) ||
-    event.params.user ==
-      Address.fromString(getAddress("P2PPairStaking"))
+    event.params.user == Address.fromString(nBAYC) ||
+    event.params.user == Address.fromString(nMAYC) ||
+    event.params.user == Address.fromString(P2PPairStaking)
   ) {
     let dashboardStake = DashboardStake.load(
       `${event.params.poolId}_${event.params.tokenId}`
@@ -53,14 +52,10 @@ export function handleDepositNft(event: DepositNft): void {
 }
 export function handleDepositPairNft(event: DepositPairNft): void {
   if (
-    event.params.user ==
-      Address.fromString(getAddress("nBAYC")) ||
-    event.params.user ==
-      Address.fromString(getAddress("nMAYC")) ||
-    event.params.user ==
-      Address.fromString(getAddress("nBAKC")) ||
-    event.params.user ==
-      Address.fromString(getAddress("P2PPairStaking"))
+    event.params.user == Address.fromString(nBAYC) ||
+    event.params.user == Address.fromString(nMAYC) ||
+    event.params.user == Address.fromString(nBAKC) ||
+    event.params.user == Address.fromString(P2PPairStaking)
   ) {
     let dashboardStake = DashboardStake.load(`3_${event.params.bakcTokenId}`);
     if (!dashboardStake) {
@@ -81,21 +76,16 @@ export function handleDepositPairNft(event: DepositPairNft): void {
 }
 
 export function handleWithdraw(event: Withdraw): void {
-  if (
-    event.params.user == Address.fromString(getAddress("cAPE"))
-  ) {
+  if (event.params.user == Address.fromString(cAPE)) {
     handleAllStake();
   }
 }
 
 export function handleWithdrawNft(event: WithdrawNft): void {
   if (
-    event.params.user ==
-      Address.fromString(getAddress("nBAYC")) ||
-    event.params.user ==
-      Address.fromString(getAddress("nMAYC")) ||
-    event.params.user ==
-      Address.fromString(getAddress("P2PPairStaking"))
+    event.params.user == Address.fromString(nBAYC) ||
+    event.params.user == Address.fromString(nMAYC) ||
+    event.params.user == Address.fromString(P2PPairStaking)
   ) {
     let dashboardStake = DashboardStake.load(
       `${event.params.poolId}_${event.params.tokenId}`
@@ -111,14 +101,10 @@ export function handleWithdrawNft(event: WithdrawNft): void {
 }
 export function handleWithdrawPairNft(event: WithdrawPairNft): void {
   if (
-    event.params.user ==
-      Address.fromString(getAddress("nBAYC")) ||
-    event.params.user ==
-      Address.fromString(getAddress("nMAYC")) ||
-    event.params.user ==
-      Address.fromString(getAddress("nBAKC")) ||
-    event.params.user ==
-      Address.fromString(getAddress("P2PPairStaking"))
+    event.params.user == Address.fromString(nBAYC) ||
+    event.params.user == Address.fromString(nMAYC) ||
+    event.params.user == Address.fromString(nBAKC) ||
+    event.params.user == Address.fromString(P2PPairStaking)
   ) {
     let dashboardStake = DashboardStake.load(`3_${event.params.bakcTokenId}`);
     if (dashboardStake) {

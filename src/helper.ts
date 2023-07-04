@@ -23,7 +23,16 @@ import {
   priceFactor,
   getDecimals,
   getName,
-  getAddress,
+  Oracle,
+  Chainlink_ETH,
+  ETH_ADRESS,
+  ParaProxy,
+  APECOINSTAKING,
+  nBAYC,
+  nMAYC,
+  nBAKC,
+  P2PPairStaking,
+  cAPE,
 } from "./constants";
 import { PoolParameters } from "../generated/PoolCore/PoolParameters";
 import { PriceOracle } from "../generated/PoolCore/PriceOracle";
@@ -47,51 +56,52 @@ export function handleUser(account: Bytes): Account {
   return user;
 }
 
-export function handleAsset(
+export function handleAccountAsset(
   account: Bytes,
-  address: Bytes,
+  asset: Asset,
   tokenId: BigInt,
   amount: BigInt
 ): AccountAssets {
-  let accountAssetsID = `${account.toHexString()}-${address.toHexString()}-${tokenId.toString()}`;
+  let accountAssetsID = `${account.toHexString()}-${asset.contractAddress.toHexString()}-${tokenId.toString()}`;
   let accountAssets = AccountAssets.load(accountAssetsID);
   if (!accountAssets) {
     accountAssets = new AccountAssets(accountAssetsID);
-
-    let asset = Asset.load(address.toHexString());
-    if (!asset) {
-      asset = new Asset(address.toHexString());
-      asset.startTime = ZERO_BI;
-      if (tokenId.equals(ZERO_BI)) {
-        asset.decimal = getDecimals(address.toHexString());
-      } else {
-        asset.decimal = 0;
-      }
-      asset.collectionName = getName(address.toHexString());
-      asset.contractAddress = address;
-      asset.auctionStatus = ZERO_BI;
-      asset.floorPrice = ZERO_BI;
-      asset.floorPriceInUSD = ZERO_BI;
-      asset.stepLinear = ZERO_BI;
-      asset.stepExp = ZERO_BI;
-      asset.currentPriceMultiplier = ZERO_BI;
-      asset.maxPriceMultiplier = ZERO_BI;
-      asset.minPriceMultiplier = ZERO_BI;
-      asset.minExpPriceMultiplier = ZERO_BI;
-      asset.traitMultiplier = ZERO_BI;
-      asset.amount = ZERO_BI;
-    }
-    asset.amount = asset.amount.plus(amount);
-    asset.identifierOrCriteria = tokenId;
-    asset.currentPrice = getPrice(address);
-    asset.currentPriceInUSD = ethToUsdPrice(asset.currentPrice);
-    asset.save();
-    accountAssets.asset = asset.id;
+    accountAssets.identifierOrCriteria = ZERO_BI;
+    accountAssets.amount = ZERO_BI;
   }
+  accountAssets.asset = asset.id;
   accountAssets.identifierOrCriteria = tokenId;
-  accountAssets.amount = amount;
+  accountAssets.amount = accountAssets.amount.plus(amount);
   accountAssets.save();
   return accountAssets;
+}
+
+export function handleAsset(address: Bytes, tokenId: BigInt): Asset {
+  let asset = Asset.load(address.toHexString());
+  if (!asset) {
+    asset = new Asset(address.toHexString());
+    asset.startTime = ZERO_BI;
+    asset.decimal = getDecimals(address.toHexString());
+    asset.collectionName = getName(address.toHexString());
+    asset.contractAddress = address;
+    asset.auctionStatus = ZERO_BI;
+    asset.floorPrice = ZERO_BI;
+    asset.floorPriceInUSD = ZERO_BI;
+    asset.stepLinear = ZERO_BI;
+    asset.stepExp = ZERO_BI;
+    asset.currentPriceMultiplier = ZERO_BI;
+    asset.maxPriceMultiplier = ZERO_BI;
+    asset.minPriceMultiplier = ZERO_BI;
+    asset.minExpPriceMultiplier = ZERO_BI;
+    asset.traitMultiplier = ZERO_BI;
+    asset.amount = ZERO_BI;
+    asset.identifierOrCriteria = ZERO_BI;
+  }
+  asset.identifierOrCriteria = tokenId;
+  asset.currentPrice = getPrice(address);
+  asset.currentPriceInUSD = ethToUsdPrice(asset.currentPrice);
+  asset.save();
+  return asset;
 }
 
 export function getPrice(address: Bytes): BigInt {
@@ -104,9 +114,7 @@ export function getPrice(address: Bytes): BigInt {
 }
 
 export function handlePrices(): void {
-  let priceOracle = PriceOracle.bind(
-    Address.fromString(getAddress("Oracle"))
-  );
+  let priceOracle = PriceOracle.bind(Address.fromString(Oracle));
   let erc721Assets = ERC721Tokens.map<Address>(
     (v: string): Address => {
       return Address.fromString(v);
@@ -130,24 +138,25 @@ export function handlePrices(): void {
       } else {
         // let oldPrice = assetPrice.price;
         // if (oldPrice.times(BigInt.fromI32(priceFactor)).gt(price.value[i])) {
-        checkHealth(assetPrice.holders);
+        // checkHealth(assetPrice.holders);
         // }
       }
       assetPrice.price = price.value[i];
       assetPrice.save();
+
+      let asset = handleAsset(assets[i], ZERO_BI);
+      asset.currentPrice = price.value[i];
+      asset.currentPriceInUSD = ethToUsdPrice(asset.currentPrice);
+      asset.save();
     }
   }
-  let aggregator = EACAggregator.bind(
-    Address.fromString(getAddress("Chainlink_ETH"))
-  );
+  let aggregator = EACAggregator.bind(Address.fromString(Chainlink_ETH));
   let ethPrice = aggregator.try_latestAnswer();
   if (!ethPrice.reverted) {
-    let assetPrice = AssetPrice.load(getAddress("ETH_ADRESS"));
+    let assetPrice = AssetPrice.load(ETH_ADRESS);
     if (!assetPrice) {
-      assetPrice = new AssetPrice(getAddress("ETH_ADRESS"));
-      assetPrice.address = Address.fromString(
-        getAddress("ETH_ADRESS")
-      );
+      assetPrice = new AssetPrice(ETH_ADRESS);
+      assetPrice.address = Address.fromString(ETH_ADRESS);
       assetPrice.holders = [];
     }
     assetPrice.price = ethPrice.value;
@@ -156,7 +165,7 @@ export function handlePrices(): void {
 }
 
 export function ethToUsdPrice(ethPrice: BigInt): BigDecimal {
-  let assetPrice = AssetPrice.load(getAddress("ETH_ADRESS"));
+  let assetPrice = AssetPrice.load(ETH_ADRESS);
   if (assetPrice) {
     return ethPrice
       .divDecimal(ONE_BD_1E18)
@@ -168,28 +177,27 @@ export function ethToUsdPrice(ethPrice: BigInt): BigDecimal {
 
 export function checkHealth(accounts: string[]): void {
   for (let i = 0; i < accounts.length; i++) {
-    let poolParameters = PoolParameters.bind(
-      Address.fromString(getAddress("ParaProxy"))
-    );
-    let userData = poolParameters.try_getUserAccountData(
-      Address.fromString(accounts[i])
-    );
-    if (!userData.reverted) {
-      let healthFactor = userData.value.getHealthFactor();
-      if (healthFactor.lt(nearHealthFactor)) {
-        handleNearLiquidation(accounts[i]);
-      } else if (healthFactor.lt(inHealthFactor)) {
-        // handleInLiquidation()
+    let holder = Holder.load(accounts[i]);
+    if (holder) {
+      let poolParameters = PoolParameters.bind(Address.fromString(ParaProxy));
+      let userData = poolParameters.try_getUserAccountData(Address.fromBytes(holder.account));
+      if (!userData.reverted) {
+        let healthFactor = userData.value.getHealthFactor();
+        if (healthFactor.lt(nearHealthFactor)) {
+          handleNearLiquidation(holder);
+        } else if (healthFactor.lt(inHealthFactor)) {
+          // handleInLiquidation()
+        }
       }
     }
   }
 }
 
-export function handleNearLiquidation(account: string): void {
-  let nearLiquidation = NearLiquidation.load(account);
+export function handleNearLiquidation(holder: Holder): void {
+  let nearLiquidation = NearLiquidation.load(holder.account.toHexString());
   if (!nearLiquidation) {
-    nearLiquidation = new NearLiquidation(account);
-    nearLiquidation.accountAddress = account;
+    nearLiquidation = new NearLiquidation(holder.account.toHexString());
+    nearLiquidation.accountAddress = holder.account;
     nearLiquidation.collateral = ZERO_BD;
     nearLiquidation.debt = ZERO_BD;
     nearLiquidation.healthFactor = ZERO_BD;
@@ -197,12 +205,8 @@ export function handleNearLiquidation(account: string): void {
     nearLiquidation.erc20Assets = [];
     nearLiquidation.erc721Assets = [];
   }
-  let poolParameters = PoolParameters.bind(
-    Address.fromString(getAddress("ParaProxy"))
-  );
-  let userData = poolParameters.try_getUserAccountData(
-    Address.fromString(account)
-  );
+  let poolParameters = PoolParameters.bind(Address.fromString(ParaProxy));
+  let userData = poolParameters.try_getUserAccountData(Address.fromBytes(holder.account));
   if (!userData.reverted) {
     nearLiquidation.collateral = ethToUsdPrice(
       userData.value.getTotalCollateralBase()
@@ -216,7 +220,7 @@ export function handleNearLiquidation(account: string): void {
       ? BigDecimal.fromString("666666")
       : nftHealthFactor.toBigDecimal();
   }
-  let userAccount = handleUser(Address.fromString(account));
+  let userAccount = handleUser(holder.account);
   let userAssets = userAccount.collateralAssets;
   for (let i = 0; i < userAssets.length; i++) {
     let ID = userAssets[i];
@@ -271,12 +275,8 @@ export function handleAllStake(): void {
   apeStakingSummary.baycStaked = ZERO_BI;
   apeStakingSummary.maycStaked = ZERO_BI;
   apeStakingSummary.bakcStaked = ZERO_BI;
-  let apeCoinStaking = ApeCoinStaking.bind(
-    Address.fromString(getAddress("APECOINSTAKING"))
-  );
-  let nBAYCStaking = apeCoinStaking.try_getAllStakes(
-    Address.fromString(getAddress("nBAYC"))
-  );
+  let apeCoinStaking = ApeCoinStaking.bind(Address.fromString(APECOINSTAKING));
+  let nBAYCStaking = apeCoinStaking.try_getAllStakes(Address.fromString(nBAYC));
   let totalDeposit = ZERO_BI;
   if (!nBAYCStaking.reverted) {
     for (let i = 0; i < nBAYCStaking.value.length; i++) {
@@ -294,9 +294,7 @@ export function handleAllStake(): void {
       }
     }
   }
-  let nMAYCStaking = apeCoinStaking.try_getAllStakes(
-    Address.fromString(getAddress("nMAYC"))
-  );
+  let nMAYCStaking = apeCoinStaking.try_getAllStakes(Address.fromString(nMAYC));
   if (!nMAYCStaking.reverted) {
     for (let i = 0; i < nMAYCStaking.value.length; i++) {
       if (nMAYCStaking.value[i][2].toBigInt().gt(ZERO_BI)) {
@@ -313,9 +311,7 @@ export function handleAllStake(): void {
       }
     }
   }
-  let nBAKCStaking = apeCoinStaking.try_getAllStakes(
-    Address.fromString(getAddress("nBAKC"))
-  );
+  let nBAKCStaking = apeCoinStaking.try_getAllStakes(Address.fromString(nBAKC));
   if (!nBAKCStaking.reverted) {
     for (let i = 0; i < nBAKCStaking.value.length; i++) {
       if (nBAKCStaking.value[i][2].toBigInt().gt(ZERO_BI)) {
@@ -327,7 +323,7 @@ export function handleAllStake(): void {
     }
   }
   let P2PStaking = apeCoinStaking.try_getAllStakes(
-    Address.fromString(getAddress("P2PPairStaking"))
+    Address.fromString(P2PPairStaking)
   );
   if (!P2PStaking.reverted) {
     for (let i = 0; i < P2PStaking.value.length; i++) {
@@ -349,9 +345,7 @@ export function handleAllStake(): void {
       }
     }
   }
-  let cAPEStaking = apeCoinStaking.try_stakedTotal(
-    Address.fromString(getAddress("cAPE"))
-  );
+  let cAPEStaking = apeCoinStaking.try_stakedTotal(Address.fromString(cAPE));
   if (!cAPEStaking.reverted) {
     apeStakingSummary.apeCoinStaked = totalDeposit.plus(cAPEStaking.value);
   }

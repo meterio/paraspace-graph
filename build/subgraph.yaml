@@ -1,6 +1,6 @@
 specVersion: 0.0.4
 schema:
-  file: ./schema.graphql
+  file: schema.graphql
 dataSources:
   - kind: ethereum
     name: PoolCore
@@ -18,39 +18,42 @@ dataSources:
         - Account
       abis:
         - name: Contract
-          file: ./abis/PoolCore.json
+          file: PoolCore/abis/PoolCore.json
         - name: PoolParameters
-          file: ./abis/PoolParameters.json
+          file: PoolCore/abis/PoolParameters.json
         - name: ERC20
-          file: ./abis/ERC20.json
+          file: PoolCore/abis/ERC20.json
         - name: ERC721
-          file: ./abis/ERC721.json
+          file: PoolCore/abis/ERC721.json
         - name: PriceOracle
-          file: ./abis/ParaSpaceOracle.json
+          file: PoolCore/abis/ParaSpaceOracle.json
         - name: EACAggregator
-          file: ./abis/EACAggregator.json
+          file: PoolCore/abis/EACAggregator.json
         - name: UiPoolDataProvider
-          file: ./abis/UiPoolDataProvider.json
+          file: PoolCore/abis/UiPoolDataProvider.json
       blockHandlers:
         - handler: handleBlock
       eventHandlers:
         - event: Borrow(indexed address,address,indexed address,uint256,uint256,indexed uint16)
           handler: handleBorrow
-        - event: LiquidateERC20(indexed address,indexed address,indexed address,uint256,uint256,address,bool)
+        - event: LiquidateERC20(indexed address,indexed address,indexed
+            address,uint256,uint256,address,bool)
           handler: handleLiquidateERC20
-        - event: LiquidateERC721(indexed address,indexed address,indexed address,uint256,uint256,address,bool)
+        - event: LiquidateERC721(indexed address,indexed address,indexed
+            address,uint256,uint256,address,bool)
           handler: handleLiquidateERC721
         - event: Repay(indexed address,indexed address,indexed address,uint256,bool)
           handler: handleRepay
         - event: Supply(indexed address,address,indexed address,uint256,indexed uint16)
           handler: handleSupply
-        - event: SupplyERC721(indexed address,address,indexed address,(uint256,bool)[],indexed uint16,bool)
+        - event: SupplyERC721(indexed address,address,indexed address,(uint256,bool)[],indexed
+            uint16,bool)
           handler: handleSupplyERC721
         - event: Withdraw(indexed address,indexed address,indexed address,uint256)
           handler: handleWithdraw
         - event: WithdrawERC721(indexed address,indexed address,indexed address,uint256[])
           handler: handleWithdrawERC721
-      file: ./src/PoolCore.ts
+      file: PoolCore/PoolCore.wasm
   - kind: ethereum
     name: PoolMarketplace
     network: goerli
@@ -67,13 +70,15 @@ dataSources:
         - PoolMarketplaceBuyWithCreditEntity
       abis:
         - name: Contract
-          file: ./abis/PoolMarketplace.json
+          file: PoolMarketplace/abis/PoolMarketplace.json
       eventHandlers:
-        - event: AcceptBidWithCredit(indexed bytes32,(address,address,bytes,(uint8,address,uint256,uint256,uint256)[],(uint8,address,uint256,uint256,uint256,address)[]),(address,uint256,bytes,uint8,bytes32,bytes32))
+        - event: AcceptBidWithCredit(indexed
+            bytes32,(address,address,bytes,(uint8,address,uint256,uint256,uint256)[],(uint8,address,uint256,uint256,uint256,address)[]),(address,uint256,bytes,uint8,bytes32,bytes32))
           handler: handleAcceptBidWithCredit
-        - event: BuyWithCredit(indexed bytes32,(address,address,bytes,(uint8,address,uint256,uint256,uint256)[],(uint8,address,uint256,uint256,uint256,address)[]),(address,uint256,bytes,uint8,bytes32,bytes32))
+        - event: BuyWithCredit(indexed
+            bytes32,(address,address,bytes,(uint8,address,uint256,uint256,uint256)[],(uint8,address,uint256,uint256,uint256,address)[]),(address,uint256,bytes,uint8,bytes32,bytes32))
           handler: handleBuyWithCredit
-      file: ./src/PoolMarketplace.ts
+      file: PoolMarketplace/PoolMarketplace.wasm
   - kind: ethereum
     name: TimeLock
     network: goerli
@@ -89,13 +94,14 @@ dataSources:
         - SummaryData
       abis:
         - name: Contract
-          file: ./abis/TimeLock.json
+          file: TimeLock/abis/TimeLock.json
       eventHandlers:
-        - event: AgreementCreated(uint256,uint8,uint8,indexed address,uint256[],indexed address,uint48)
+        - event: AgreementCreated(uint256,uint8,uint8,indexed address,uint256[],indexed
+            address,uint48)
           handler: handleAgreementCreated
         - event: AgreementClaimed(uint256,uint8,uint8,indexed address,uint256[],indexed address)
           handler: handleAgreementClaimed
-      file: ./src/PoolCore.ts
+      file: PoolCore/PoolCore.wasm
   - kind: ethereum
     name: ApeCoinStaking
     network: goerli
@@ -113,7 +119,7 @@ dataSources:
         - DashboardStake
       abis:
         - name: Contract
-          file: ./abis/ApeCoinStaking.json
+          file: ApeCoinStaking/abis/ApeCoinStaking.json
       eventHandlers:
         - event: Deposit(indexed address,uint256,address)
           handler: handleDeposit
@@ -127,4 +133,4 @@ dataSources:
           handler: handleWithdrawNft
         - event: WithdrawPairNft(indexed address,uint256,uint256,uint256,uint256)
           handler: handleWithdrawPairNft
-      file: ./src/ApeCoinStaking.ts
+      file: ApeCoinStaking/ApeCoinStaking.wasm
