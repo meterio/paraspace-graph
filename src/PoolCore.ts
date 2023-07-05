@@ -31,12 +31,12 @@ import {
   handleAccountAsset,
 } from "./helper";
 
-export function handleBlock(block: ethereum.Block): void {
-  let number = block.number;
-  if (number.mod(BigInt.fromI32(100)).equals(ZERO_BI)) {
-    handlePrices();
-  }
-}
+// export function handleBlock(block: ethereum.Block): void {
+//   let number = block.number;
+//   if (number.mod(BigInt.fromI32(1000)).equals(ZERO_BI)) {
+//     handlePrices();
+//   }
+// }
 export function handleLiquidateERC20(event: LiquidateERC20): void {}
 export function handleLiquidateERC721(event: LiquidateERC721): void {}
 

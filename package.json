@@ -4,7 +4,7 @@
   "scripts": {
     "codegen": "graph codegen",
     "build": "graph build",
-    "deploy": "graph deploy --studio meterspace",
+    "deploy": "graph deploy --studio meter-space",
     "test": "graph test"
   },
   "dependencies": {

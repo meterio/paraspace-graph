@@ -31,8 +31,6 @@ dataSources:
           file: PoolCore/abis/EACAggregator.json
         - name: UiPoolDataProvider
           file: PoolCore/abis/UiPoolDataProvider.json
-      blockHandlers:
-        - handler: handleBlock
       eventHandlers:
         - event: Borrow(indexed address,address,indexed address,uint256,uint256,indexed uint16)
           handler: handleBorrow
@@ -102,35 +100,3 @@ dataSources:
         - event: AgreementClaimed(uint256,uint8,uint8,indexed address,uint256[],indexed address)
           handler: handleAgreementClaimed
       file: PoolCore/PoolCore.wasm
-  - kind: ethereum
-    name: ApeCoinStaking
-    network: goerli
-    source:
-      address: "0xeF37717B1807a253c6D140Aca0141404D23c26D4"
-      abi: Contract
-      startBlock: 9000000
-    mapping:
-      kind: ethereum/events
-      apiVersion: 0.0.6
-      language: wasm/assemblyscript
-      entities:
-        - SummaryData
-        - ApeStakingSummary
-        - DashboardStake
-      abis:
-        - name: Contract
-          file: ApeCoinStaking/abis/ApeCoinStaking.json
-      eventHandlers:
-        - event: Deposit(indexed address,uint256,address)
-          handler: handleDeposit
-        - event: DepositNft(indexed address,indexed uint256,uint256,uint256)
-          handler: handleDepositNft
-        - event: DepositPairNft(indexed address,uint256,uint256,uint256,uint256)
-          handler: handleDepositPairNft
-        - event: Withdraw(indexed address,uint256,address)
-          handler: handleWithdraw
-        - event: WithdrawNft(indexed address,indexed uint256,uint256,address,uint256)
-          handler: handleWithdrawNft
-        - event: WithdrawPairNft(indexed address,uint256,uint256,uint256,uint256)
-          handler: handleWithdrawPairNft
-      file: ApeCoinStaking/ApeCoinStaking.wasm
