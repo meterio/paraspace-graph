@@ -24,8 +24,6 @@ import { ZERO_BI } from "./constants";
 import {
   handleUser,
   handleAsset,
-  handlePrices,
-  checkHealth,
   addHolder,
   removeHolder,
   handleAccountAsset,
@@ -41,44 +39,38 @@ export function handleLiquidateERC20(event: LiquidateERC20): void {}
 export function handleLiquidateERC721(event: LiquidateERC721): void {}
 
 export function handleBorrow(event: Borrow): void {
-  // let user = handleUser(event.params.user);
-  // let accountAsset = handleAsset(
-  //   event.params.user,
-  //   event.params.reserve,
-  //   ZERO_BI,
-  //   event.params.amount
-  // );
-  // let assets = user.debtAssets;
-  // assets.push(accountAsset.id);
-  // user.debtAssets = assets;
-  // user.save();
-  // addHolder(event.params.reserve, event.params.user);
+  let user = handleUser(event.params.user);
+  let accountAsset = handleAsset(
+    event.params.reserve,
+    ZERO_BI
+  );
+  let assets = user.debtAssets;
+  assets.push(accountAsset.id);
+  user.debtAssets = assets;
+  user.save();
+  addHolder(event.params.reserve, event.params.user);
 }
 
 export function handleRepay(event: Repay): void {
-  // let accountAsset = handleAsset(
-  //   event.params.user,
-  //   event.params.reserve,
-  //   ZERO_BI,
-  //   ZERO_BI.minus(event.params.amount)
-  // );
-  // if (accountAsset.amount.equals(ZERO_BI)) {
-  //   accountAsset.unset(accountAsset.id);
-  // }
+  let accountAsset = handleAsset(
+    event.params.reserve,
+    ZERO_BI
+  );
+  if (accountAsset.amount.equals(ZERO_BI)) {
+    accountAsset.unset(accountAsset.id);
+  }
 }
 export function handleSupply(event: Supply): void {
-  // let user = handleUser(event.params.user);
-  // let accountAsset = handleAsset(
-  //   event.params.user,
-  //   event.params.reserve,
-  //   ZERO_BI,
-  //   event.params.amount
-  // );
-  // let assets = user.collateralAssets;
-  // assets.push(accountAsset.id);
-  // user.collateralAssets = assets;
-  // user.save();
-  // addHolder(event.params.reserve, event.params.user);
+  let user = handleUser(event.params.user);
+  let accountAsset = handleAsset(
+    event.params.reserve,
+    ZERO_BI
+  );
+  let assets = user.collateralAssets;
+  assets.push(accountAsset.id);
+  user.collateralAssets = assets;
+  user.save();
+  addHolder(event.params.reserve, event.params.user);
 }
 export function handleSupplyERC721(event: SupplyERC721): void {
   let user = handleUser(event.params.user);
@@ -100,23 +92,21 @@ export function handleSupplyERC721(event: SupplyERC721): void {
   addHolder(event.params.reserve, event.params.user);
 }
 export function handleWithdraw(event: Withdraw): void {
-  // let accountAsset = handleAsset(
-  //   event.params.user,
-  //   event.params.reserve,
-  //   ZERO_BI,
-  //   ZERO_BI.minus(event.params.amount)
-  // );
-  // if (accountAsset.amount.equals(ZERO_BI)) {
-  //   accountAsset.unset(accountAsset.id);
-  // }
+  let accountAsset = handleAsset(
+    event.params.reserve,
+    ZERO_BI
+  );
+  if (accountAsset.amount.equals(ZERO_BI)) {
+    accountAsset.unset(accountAsset.id);
+  }
 }
 export function handleWithdrawERC721(event: WithdrawERC721): void {
-  // let ID = `${event.params.user}-${event.params.reserve}-${event.params.tokenIds}`;
-  // let accountAsset = AccountAssets.load(ID);
-  // if (accountAsset) {
-  //   accountAsset.unset(ID);
-  //   removeHolder(event.params.reserve, event.params.user);
-  // }
+  let ID = `${event.params.user}-${event.params.reserve}-${event.params.tokenIds}`;
+  let accountAsset = AccountAssets.load(ID);
+  if (accountAsset) {
+    accountAsset.unset(ID);
+    removeHolder(event.params.reserve, event.params.user);
+  }
 }
 
 export function handleAgreementCreated(event: AgreementCreated): void {

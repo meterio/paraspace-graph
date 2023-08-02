@@ -53,50 +53,26 @@ dataSources:
           handler: handleWithdrawERC721
       file: PoolCore/PoolCore.wasm
   - kind: ethereum
-    name: PoolMarketplace
+    name: P2PPairStaking
     network: goerli
     source:
-      address: "0xF6d07265E9507233c5d0e524D146dF2794cE30c5"
-      abi: Contract
-      startBlock: 8704648
+      address: "0xd9c4C4170c082A6933db215817c6A94d6D0aC92A"
+      abi: P2PPairStaking
+      startBlock: 8705000
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6
       language: wasm/assemblyscript
       entities:
-        - PoolMarketplaceAcceptBidWithCreditEntity
-        - PoolMarketplaceBuyWithCreditEntity
+        - PairStakingMatched
       abis:
-        - name: Contract
-          file: PoolMarketplace/abis/PoolMarketplace.json
+        - name: P2PPairStaking
+          file: P2PPairStaking/abis/P2PPairStaking.json
       eventHandlers:
-        - event: AcceptBidWithCredit(indexed
-            bytes32,(address,address,bytes,(uint8,address,uint256,uint256,uint256)[],(uint8,address,uint256,uint256,uint256,address)[]),(address,uint256,bytes,uint8,bytes32,bytes32))
-          handler: handleAcceptBidWithCredit
-        - event: BuyWithCredit(indexed
-            bytes32,(address,address,bytes,(uint8,address,uint256,uint256,uint256)[],(uint8,address,uint256,uint256,uint256,address)[]),(address,uint256,bytes,uint8,bytes32,bytes32))
-          handler: handleBuyWithCredit
-      file: PoolMarketplace/PoolMarketplace.wasm
-  - kind: ethereum
-    name: TimeLock
-    network: goerli
-    source:
-      address: "0x1E78BD140a288fe61933608127C1d43e5424c018"
-      abi: Contract
-      startBlock: 8704638
-    mapping:
-      kind: ethereum/events
-      apiVersion: 0.0.6
-      language: wasm/assemblyscript
-      entities:
-        - SummaryData
-      abis:
-        - name: Contract
-          file: TimeLock/abis/TimeLock.json
-      eventHandlers:
-        - event: AgreementCreated(uint256,uint8,uint8,indexed address,uint256[],indexed
-            address,uint48)
-          handler: handleAgreementCreated
-        - event: AgreementClaimed(uint256,uint8,uint8,indexed address,uint256[],indexed address)
-          handler: handleAgreementClaimed
-      file: PoolCore/PoolCore.wasm
+        - event: PairStakingMatched(bytes32)
+          handler: handlePairStakingMatched
+        - event: OrderCancelled(bytes32,indexed address)
+          handler: handleOrderCancelled
+        - event: PairStakingBreakUp(bytes32)
+          handler: handlePairStakingBreakUp
+      file: P2PPairStaking/P2PPairStaking.wasm
